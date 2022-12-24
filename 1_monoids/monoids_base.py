@@ -6,7 +6,7 @@ from typing import List
 
 import numpy as np
 
-from sol.day_4_monoids import ihm_success, ihm_failure, mdc_processor, npdc_processor, mdc_failure
+from sol.monoids_day_4_final import ihm_success, ihm_failure, mdc_processor, npdc_processor, mdc_failure
 
 
 
@@ -31,7 +31,7 @@ def mdc_run(
     :param crash_proba:
     :return:
     """
-    if np.random.random() <= prob_mdc_crash:
+    if np.random.random() < prob_mdc_crash:
         return mdc_failure()
     num_ihms = np.random.randint(2, 5)
     ihm_results = simulate_ihm(num_ihms, prob_ihm_crash)
