@@ -1,3 +1,24 @@
+# Foreword
+
+## A functor vs a function
+
+In `C++` (and perhaps other languages) people will occasionally refer to functors in a different light than we will in
+this tutorial.
+See [funtor vs function - C++](https://stackoverflow.com/questions/6451866/why-use-functors-over-functions).
+
+This tutorial discusses functors in the category theory sense.
+
+## A reminder
+
+This [excellent answer](https://stackoverflow.com/a/56601178/3532564) describes the  `functors`
+and `monads`
+
+`functors` and `monads` both provide some tool to wrapped input, returning a wrapped output.
+
+- `functor` = map (i.e. the tool)
+
+> map = the tool which takes a function as input, applies it to raw value in wrapper, and returns wrapped result.
+
 # Scenario
 
 After your big project, you manage to sneak off to Hawaii for a bit. You've been watching "White Lotus" and have always
@@ -5,7 +26,9 @@ wanted to go so after the successful project launch from your monoid work, this 
 run into Santa and Rudolph and you all get to talking (while relaxing on the
 beach, of course).
 
-<img height="300" src="../assets/santa_elf_beach.jpg" width="300"/>
+<img height="300" src="../assets/santa_elf_beach.jpg" width="300"/> 
+
+(Art from Stable Diffusion)
 
 Santa has some big ideas and you pitched your own to the big guy. It turns out that in the past, Santa used to be a
 lead engineer but put away his Engineering cap for the famous red one; his mind is still sharp as ever for these sorts
@@ -74,9 +97,12 @@ over containers" and you sort of zoned out.
 
 ### Discussion
 
+> map = the tool which takes a function as input, applies it to raw value in wrapper, and returns wrapped result.
+
 See [functors_101.md](functors_101.md) for a more in-depth discussion on functors and their definition but TL;DR by
 using functors, we can
-abstract over "containers" or "structures".
+abstract over "containers" or "structures". Functors and monads both provide some tool to wrapped input, returning a
+wrapped output.
 
 Compare and constrast how easily we could use a `map` and `filter` on our original code from `day_1.py`. The structure
 felt very natural to how we think about lists where we can iterate through them.
@@ -86,6 +112,7 @@ traverse our structure and apply functions, we were able to implement an abstrac
 underlying data-structure. As far as the end-user is concerned, the implementation might as well have been a list.
 
 And that's really the power of a functor - it lets us abstract over containers of **things**.
+
 
 ### Tasklist
 
@@ -103,3 +130,5 @@ but now that we're past that hurdle, we've reached a point where we need to hand
 returned. Although Python has nice syntax for handling `None`, I'll introduce the following idea: `Maybe` where it
 encapsulates the idea of a "This-might-be-something" and if it is not, then it is "Nothing". See
 how [Rust](https://doc.rust-lang.org/std/option/) handles optional values.
+
+We revisit this idea and logging in our section on `monads` to finish up this tutorial.

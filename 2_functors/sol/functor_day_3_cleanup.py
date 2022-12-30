@@ -73,9 +73,9 @@ def prototype(num_ihms: int, crash_proba: float, num_features: int):
     def func_to_filter(ihm: IHM) -> bool:
         return ihm.keep
 
-    ihm_results = simulate_ihm(num_ihms, crash_proba, num_features)
-    print(f"Length of original: {len(ihm_results)}")
-    mapped_over = map_func(ihm_results, lambda x: func_to_map(x, "keep"))
+    avl_tree_res = simulate_ihm(num_ihms, crash_proba, num_features)
+    print(f"Length of original: {len(avl_tree_res)}")
+    mapped_over = map_func(avl_tree_res, lambda x: func_to_map(x, "keep"))
     filtered_out = filter_by_func(mapped_over, lambda x: func_to_filter(x))
     print(f"Length of filtered: {len(filtered_out)}")
 
@@ -94,8 +94,8 @@ def prototype(num_ihms: int, crash_proba: float, num_features: int):
         print("Called fog")
         return f(g(ihm))
 
-    ihm_results = simulate_ihm(2, crash_proba, num_features)
-    r1 = ihm_results.map(g)
+    avl_tree_res = simulate_ihm(2, crash_proba, num_features)
+    r1 = avl_tree_res.map(g)
     r2 = r1.map(f)
-    r3 = ihm_results.map(f_of_g)
+    r3 = avl_tree_res.map(f_of_g)
     print("Place debugger at this line")
