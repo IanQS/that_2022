@@ -2,11 +2,10 @@
 The same as the code from functor_driver.py, except we're no longer
 in prototype mode. Now, our code can crash.
 """
-from typing import Union
 
 import numpy as np
 
-from sol.monad_day_1 import simulate_ihm, OptionalIHM, IHM
+from sol.monad_day_1 import simulate_ihm
 
 if __name__ == '__main__':
     NUM_FEATURES = 5

@@ -1,7 +1,7 @@
 """
-We simulate a distributed training architecture by doing multiprocessing. We train a distributed classifier
-    neural network where each "node" computes the aggregate gradient of a specific city block
+Our driver code that we can use to run the various sol/monoids_day_x.py files
 """
+
 from typing import List
 
 import numpy as np
