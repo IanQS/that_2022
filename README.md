@@ -1,19 +1,8 @@
 # Welcome!
 
 Hi there, thank you for checking out this repo! If you're interested purely in the technical content, head to the
-[Setup](#Setup) where we keep the story to a minimum. The material here was made for the TODO: [THAT Conference 2023]()
+[Setup](#Setup) where we keep the story to a minimum. The material here was made for the [THAT Conference 2023](https://that.us/events/tx/2023/schedule/)
 but feel free to follow along at home. Hopefully you find this material to be enlightening.
-
-# TL;DR
-
-This [excellent answer](https://stackoverflow.com/a/56601178/3532564) describes, at a very high level, `functors`
-and `monads`
-
-`functors` and `monads` both provide some tool to wrapped input, returning a wrapped output.
-
-- `functor` = map (i.e. the tool)
-
-- `monad` = unit + flatMap (or bind or chain)
 
 # Backstory
 
