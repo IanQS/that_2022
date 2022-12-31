@@ -1,12 +1,13 @@
 """
 Please read the entire file if possible
 """
-from typing import List, Callable, Optional, Union, Tuple
+import uuid
+from dataclasses import dataclass
+from typing import List, Callable, Tuple
 
 import numpy as np
-from dataclasses import dataclass
-import uuid
-from .avl_tree_0 import AVLTree, _TreeNode
+
+from .avl_tree_0 import AVLTree
 
 
 def simulate_ihm(
@@ -52,6 +53,7 @@ class IHM:
     time_taken: np.ndarray
     ihm_uuid: str
     loss: np.ndarray
+
 
 def ihm_success(num_features: int):
     time_taken = np.random.rand()

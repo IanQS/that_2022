@@ -5,7 +5,9 @@
 Start here because this is important. Back when I was first learning about `Monads`, I found
 the [Haskell Wiki about Monads](https://wiki.haskell.org/Monad)
 and [The Absolute Best Intro to Monads For Software Engineers by Studying with Alex](https://www.youtube.com/watch?v=C2w45qRc3aU)
-which were invaluable (and I **highly** recommend you check them out after this tutorial). Additionally, I recommend reading through [adit.io - Functors, Applicatives, And Monads In Pictures](https://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html)
+which were invaluable (and I **highly** recommend you check them out after this tutorial). Additionally, I recommend
+reading
+through [adit.io - Functors, Applicatives, And Monads In Pictures](https://adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html)
 
 Unless you've had some experience with functional programming and the notion of "impure" and "
 pure" functions, I'd recommend reading this tutorial first.

@@ -97,6 +97,7 @@ See [Monoids 101](monoids_101.md) for a further discussion, but knowing just tho
 
 Some prompts for the future discussions on functors and monads:
 
-- What if we wanted to efficiently find some information about an IHM? Instead of doing a simple linear-search? 
+- What if we wanted to efficiently find some information about an IHM? Instead of doing a simple linear-search?
 - What if we wanted to trace our operations through the distributed system to accumulate information?
-- What if we wanted to stop worrying about the [billion dollar mistake](https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/)
+- What if we wanted to stop worrying about
+  the [billion dollar mistake](https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/)

@@ -1,10 +1,9 @@
 """
 
 """
-import copy
 
 import numpy as np
-from typing import List, Any
+
 from sol.functor_day_3_cleanup import simulate_ihm, prototype
 
 if __name__ == '__main__':

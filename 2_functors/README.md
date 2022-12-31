@@ -113,7 +113,6 @@ underlying data-structure. As far as the end-user is concerned, the implementati
 
 And that's really the power of a functor - it lets us abstract over containers of **things**.
 
-
 ### Tasklist
 
 Clean up the code from `day_2` and `avl_tree_starter.py` and transform them into `day_3` and `avl_tree_functor.py`

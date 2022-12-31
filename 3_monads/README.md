@@ -7,13 +7,11 @@ and `monads`
 
 - `Monad` = unit + flatMap (or bind or chain)
 
-## `unit`? 
+## `unit`?
 
-A constructor. It takes some arbitrary type, `a`, and transforms it into a Monad type, `Monad b`. 
+A constructor. It takes some arbitrary type, `a`, and transforms it into a Monad type, `Monad b`.
 
 ## A `flatMap`?
-
-
 
 # Scenario
 
@@ -36,15 +34,17 @@ comes in and shares
 that their debugging process has been a nightmare. They've got functions calling functions and they need a way to pass
 around logs. Your
 `Monoids` and `Functors` have been extremely useful, but the team has ended up passing around lots of data and it is
-difficult to maintain. Typically, they'd just overload the `__repr__` and `__str__` methods, but it's a little messy visualizing
+difficult to maintain. Typically, they'd just overload the `__repr__` and `__str__` methods, but it's a little messy
+visualizing
 the tree-structure, and passing around the logs at every step is messy.
 
 They tell you that they've used your final iteration of the code on functors and that it would be a fantastic starting
-point. 
+point.
 
 ## Day 1: Refactoring
 
-You decide to tackle the issue of having the `None` values being stored in a separate data-structure. Ideally, they all sit in the same place.
+You decide to tackle the issue of having the `None` values being stored in a separate data-structure. Ideally, they all
+sit in the same place.
 
 Task list
 

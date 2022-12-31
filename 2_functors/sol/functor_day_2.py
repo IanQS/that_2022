@@ -1,11 +1,12 @@
 """
 Please read the entire file if possible
 """
-from typing import List, Callable, Optional, Union
+import uuid
+from dataclasses import dataclass
+from typing import List, Callable
 
 import numpy as np
-from dataclasses import dataclass
-import uuid
+
 from .avl_tree_starter import AVLTree, _TreeNode
 
 

@@ -172,6 +172,7 @@ class AVLTree:
     """
     Custom code
     """
+
     def __init__(self):
         self._root = None
         self._avl_tree = _AVLTree()

@@ -5,10 +5,10 @@ The requests:
 2) How many houses are serviced by the MDC
 3) how many IHMs failed in their gradient collection per-MDC and overall
 """
-import time
+
+from typing import List, Optional, TypeVar
 
 import numpy as np
-from typing import List, Optional, TypeVar
 
 Result = TypeVar("Result")
 

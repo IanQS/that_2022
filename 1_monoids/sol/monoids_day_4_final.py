@@ -6,11 +6,11 @@ The requests:
 
 See the accompanying
 """
-import time
+
+from dataclasses import dataclass, field
+from typing import List, Optional, TypeVar, Tuple
 
 import numpy as np
-from typing import List, Optional, TypeVar, Tuple
-from dataclasses import dataclass, field
 
 Result = TypeVar("Result")
 

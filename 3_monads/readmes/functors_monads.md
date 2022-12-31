@@ -12,7 +12,6 @@ and `monads`
 
 - `monad` = unit + flatMap (or bind or chain)
 
-
 ---
 
 Monads and functors look VERY similar. In fact, let's put them "side-by-side":

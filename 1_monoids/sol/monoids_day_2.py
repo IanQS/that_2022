@@ -4,10 +4,10 @@ The requests:
 1) find the fastest and slowest MDCs (to fix up the connection/ bump up the hardware)
 2) find the variance of grads for both the IHMs and the MDCs
 """
-import time
+
+from typing import List, Optional, TypeVar
 
 import numpy as np
-from typing import List, Optional, TypeVar
 
 Result = TypeVar("Result")
 

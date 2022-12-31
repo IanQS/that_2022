@@ -1,11 +1,11 @@
 """
 Cleanup!!
 """
-import time
+
+from dataclasses import dataclass
+from typing import List, Optional, Tuple
 
 import numpy as np
-from typing import List, Optional, Tuple
-from dataclasses import dataclass
 
 Result = Tuple[np.ndarray, float]
 
@@ -30,6 +30,7 @@ class MDC_Tracker():
             self.num_houses_serviced, self.num_IHMs_failed, \
             self.ihm_time_tracker
 
+
 @dataclass
 class NPDC_Tracker():
     accum_grad: np.ndarray
@@ -50,6 +51,7 @@ class NPDC_Tracker():
 
     def __repr__(self):
         return self.__str__()
+
 
 ################################################
 # Actual code

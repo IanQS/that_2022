@@ -1,12 +1,13 @@
 """
 Please read the entire file if possible
 """
-from typing import List, Callable, Optional, Union
+import uuid
+from dataclasses import dataclass
+from typing import Callable, Optional
 
 import numpy as np
-from dataclasses import dataclass
-import uuid
-from .avl_tree_1 import AVLTree, _TreeNode
+
+from .avl_tree_1 import AVLTree
 
 
 def simulate_ihm(
@@ -20,7 +21,7 @@ def simulate_ihm(
         if np.random.random() < prob_ihm_crash:
             maybe_ihm = OptionalIHM(ihm_failure())
             loss = -failure_count
-            failure_count+=1
+            failure_count += 1
         else:
             maybe_ihm = OptionalIHM(ihm_success(num_features))
             loss = maybe_ihm.ihm_data.loss

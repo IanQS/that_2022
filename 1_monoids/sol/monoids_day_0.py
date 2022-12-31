@@ -1,8 +1,9 @@
 """
 Our starting code
 """
-import numpy as np
 from typing import List, Optional, TypeVar
+
+import numpy as np
 
 Result = TypeVar("Result")
 
@@ -33,6 +34,7 @@ def mdc_processor(ihm_results):
             accumulated_gradient += curr_grad
     return accumulated_gradient
 
+
 def npdc_processor(mdc_result_list: List[Optional[Result]]):
     accumulated_gradient = None
     if not mdc_result_list:
@@ -40,7 +42,7 @@ def npdc_processor(mdc_result_list: List[Optional[Result]]):
     for mdc_result in mdc_result_list:
         if mdc_result is None:
             continue
-        curr_grad  = mdc_result
+        curr_grad = mdc_result
         if accumulated_gradient is None:
             accumulated_gradient = curr_grad
         else:

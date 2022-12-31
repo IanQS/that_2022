@@ -5,8 +5,6 @@ more or less what we had in our section on monoids
 from typing import List
 
 import numpy as np
-from dataclasses import dataclass
-import uuid
 
 
 ################################################

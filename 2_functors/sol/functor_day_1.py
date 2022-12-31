@@ -4,11 +4,11 @@
 2) Expose a function to add arbitrary data to the stored IHM data
 3) Expose a function that allows you to filter arbitrary keys based on some bounds
 """
+import uuid
+from dataclasses import dataclass
 from typing import List, Callable
 
 import numpy as np
-from dataclasses import dataclass
-import uuid
 
 
 @dataclass

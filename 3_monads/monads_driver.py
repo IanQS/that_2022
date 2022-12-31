@@ -2,10 +2,9 @@
 The same as the code from functor_driver.py, except we're no longer
 in prototype mode. Now, our code can crash.
 """
-import copy
 
 import numpy as np
-from typing import List, Any
+
 from sol.monad_day_1 import simulate_ihm
 
 if __name__ == '__main__':

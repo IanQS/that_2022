@@ -1,12 +1,13 @@
 """
 Please read the entire file if possible
 """
-from typing import List, Callable, Optional, Union
+import uuid
+from dataclasses import dataclass
+from typing import Callable
 
 import numpy as np
-from dataclasses import dataclass
-import uuid
-from .avl_tree_functor import AVLTree, _TreeNode
+
+from .avl_tree_functor import AVLTree
 
 
 def simulate_ihm(
@@ -32,12 +33,14 @@ def map_func(avl_tree: AVLTree, func_to_map: Callable):
     """
     return avl_tree.map(func_to_map)
 
+
 def filter_by_func(avl_tree: AVLTree, func_to_filter_with: Callable):
     """
     Original Code:
     return list(filter(func_to_map, ihm_list))
     """
     return avl_tree.filter(func_to_filter_with)
+
 
 ################################################
 # Ignore below
@@ -85,6 +88,7 @@ def prototype(num_ihms: int, crash_proba: float, num_features: int):
         print("Called f")
         ihm.gradient = 0
         return ihm
+
     def g(ihm: IHM):
         print("Called g")
         ihm.loss += 100
