@@ -1,9 +1,10 @@
 """
 The requests:
 
-1) how long each ihm takes
+1) how long does each IHM takes
 2) How many houses are serviced by the MDC
 3) how many IHMs failed in their gradient collection per-MDC and overall
+
 """
 
 from typing import List, Optional, TypeVar
@@ -47,7 +48,6 @@ def mdc_processor(ihm_results):
         ihm_time_tracker.append(curr_time)
     num_houses_serviced = len(ihm_results)
     num_IHMs_failed = num_houses_serviced - num_valids
-    # Requirement 2 and 3
     return accumulated_gradient, num_houses_serviced, num_IHMs_failed, ihm_time_tracker
 
 

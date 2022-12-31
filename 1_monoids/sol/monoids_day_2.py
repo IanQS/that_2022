@@ -1,8 +1,10 @@
 """
 The requests:
 
+
 1) find the fastest and slowest MDCs (to fix up the connection/ bump up the hardware)
-2) find the variance of grads for both the IHMs and the MDCs
+2) find the variance of the IHMs and the MDCs
+
 """
 
 from typing import List, Optional, TypeVar

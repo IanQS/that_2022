@@ -13,7 +13,7 @@ A constructor. It takes some arbitrary type, `a`, and transforms it into a Monad
 
 ## A `bind`?
 
-A 
+A
 
 # Scenario
 

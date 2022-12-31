@@ -1,10 +1,5 @@
 """
-The requests:
-
-1) find the fastest and slowest MDCs (to fix up the connection/ bump up the hardware)
-2) find the variance of grads for both the IHMs and the MDCs
-
-See the accompanying
+Using Monoids!!
 """
 
 from dataclasses import dataclass, field
@@ -145,7 +140,7 @@ class NPDC_Monoid():
 
 
 ################################################
-# Actual code
+# Code that the end-user sees
 ################################################
 
 def ihm_success(num_features) -> Result:
