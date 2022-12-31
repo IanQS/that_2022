@@ -196,9 +196,14 @@ class AVLTree:
         while horizon:
             curr_node: _TreeNode = horizon.pop()
             if curr_node:
-                dc_data = copy.deepcopy(curr_node.ihm_data)
-                modified_data = dc_data.bind(func_to_map)
-                new_tree.insert_node(modified_data.loss, modified_data)
+                dc_data: "OptionalIHM" = copy.deepcopy(curr_node.ihm_data)
+                modified_data = dc_data.apply_function(func_to_map)
+                # Need to do the following bc the incoming function might have changed
+                # the underlying loss value
+                if dc_data._get_("loss") is None:
+                    new_tree.insert_node(curr_node.key, modified_data)
+                else:
+                    new_tree.insert_node(dc_data._get_("loss"), modified_data)
                 horizon.append(curr_node.left)
                 horizon.append(curr_node.right)
 

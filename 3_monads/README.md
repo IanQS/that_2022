@@ -11,7 +11,9 @@ and `monads`
 
 A constructor. It takes some arbitrary type, `a`, and transforms it into a Monad type, `Monad b`.
 
-## A `flatMap`?
+## A `bind`?
+
+A 
 
 # Scenario
 
@@ -53,5 +55,10 @@ Task list
 1) modify `map` to account for ^
 ```
 
+### A solution
+
+- `monad_day_1.py`
+
 ## Day 2: Logging
 
+Going back to your conversation with Santa, you decide to add in logging to the code. 

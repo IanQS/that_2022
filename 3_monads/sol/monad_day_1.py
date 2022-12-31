@@ -3,7 +3,7 @@ Please read the entire file if possible
 """
 import uuid
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 import numpy as np
 
@@ -26,7 +26,28 @@ def simulate_ihm(
             maybe_ihm = OptionalIHM(ihm_success(num_features))
             loss = maybe_ihm.ihm_data.loss
         avl_tree.insert_node(key=loss, ihm_data=maybe_ihm)
-    return avl_tree
+
+    def f1(definitely_ihm: IHM) -> Union[IHM, None]:
+        definitely_ihm.ihm_uuid = f"Added to UUID: {definitely_ihm.ihm_uuid}"
+        return definitely_ihm
+
+    def f2(definitely_ihm: IHM) -> Union[IHM, None]:
+        definitely_ihm.checked = True
+        return definitely_ihm
+
+    print("\t-Uncomment the debug lines in monad_day_1.simulate_ihm to investigate the tree")
+    # avl_tree.debug()
+    new_tree = avl_tree.map(
+        f1
+    )
+
+    # new_tree.debug()
+    new_tree = new_tree.map(
+        f2
+    )
+    # new_tree.debug()
+
+    return new_tree
 
 
 def map_func(avl_tree: AVLTree, func_to_map: Callable):
@@ -65,7 +86,7 @@ class OptionalIHM:
     def __init__(self, ihm_data: Optional[IHM] = None):
         self.ihm_data = ihm_data
 
-    def bind(self, callable_func: Callable[[IHM], IHM]) -> "OptionalIHM":
+    def apply_function(self, callable_func: Callable[[IHM], Union[IHM, None]]) -> "OptionalIHM":
         if self.ihm_data is None:
             return OptionalIHM(self.ihm_data)
         return OptionalIHM(callable_func(self.ihm_data))
@@ -77,6 +98,16 @@ class OptionalIHM:
 
     def __str__(self):
         return self.__repr__()
+
+    def _get_(self, attr_name):
+        if attr_name == "__setstate__":
+            raise AttributeError(attr_name)
+        if hasattr(self, attr_name):
+            return getattr(self, attr_name)
+            # return self.property_name
+        if hasattr(self.ihm_data, attr_name):
+            return getattr(self.ihm_data, attr_name)
+        return None
 
 
 def ihm_success(num_features: int):
