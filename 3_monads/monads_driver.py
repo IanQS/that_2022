@@ -6,7 +6,7 @@ import copy
 
 import numpy as np
 from typing import List, Any
-from sol.monad_day_0 import simulate_ihm
+from sol.monad_day_1 import simulate_ihm
 
 if __name__ == '__main__':
     NUM_FEATURES = 5
@@ -16,4 +16,8 @@ if __name__ == '__main__':
         num_ihms = np.random.randint(4, 20)
         print(f"Testing with IHM Crash proba: {prob_ihm_crash}")
         print("*" * 25)
-        generated_tree = simulate_ihm(num_ihms, prob_ihm_crash, NUM_FEATURES)
+        try:
+            generated_tree = simulate_ihm(num_ihms, prob_ihm_crash, NUM_FEATURES)
+        except TypeError as e:
+            # Only in case of monad_day_0
+            generated_tree, failures = simulate_ihm(num_ihms, prob_ihm_crash, NUM_FEATURES)

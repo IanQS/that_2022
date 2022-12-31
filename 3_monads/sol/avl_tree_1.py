@@ -17,7 +17,7 @@ class _TreeNode(object):
 class _AVLTree(object):
 
     # Function to insert a node
-    def insert_node(self, root, key, ihm_data):
+    def insert_node(self, root, key, ihm_data: "OptionalIHM"):
 
         # Find the correct location and insert the node
         if not root:
@@ -158,7 +158,7 @@ class _AVLTree(object):
             else:
                 sys.stdout.write("L----")
                 indent += "|    "
-            print(currPtr.key)
+            print(currPtr.key, currPtr.ihm_data)
             self.printHelper(currPtr.left, indent, False)
             self.printHelper(currPtr.right, indent, True)
 
@@ -203,6 +203,9 @@ class AVLTree:
                 horizon.append(curr_node.right)
 
         return new_tree
+
+    def debug(self):
+        self._avl_tree.printHelper(self._root, "", None)
 
     def filter(self, func_to_filter_with: Callable):
         horizon: List[_TreeNode] = [self._root]

@@ -1,7 +1,7 @@
 """
 Please read the entire file if possible
 """
-from typing import List, Callable, Optional, Union
+from typing import List, Callable, Optional, Union, Tuple
 
 import numpy as np
 from dataclasses import dataclass
@@ -13,15 +13,16 @@ def simulate_ihm(
     num_ihms: int,
     prob_ihm_crash: float,
     num_features: int
-) -> AVLTree:
+) -> Tuple[AVLTree, List]:
     avl_tree = AVLTree()
+    failures = []
     for i in range(num_ihms):
         if np.random.random() < prob_ihm_crash:
-            maybe_ihm = ihm_failure()
+            failures.append(ihm_failure())
         else:
-            maybe_ihm = MaybeIHM(ihm_success(num_features))
-        avl_tree.insert_node(key=np.inf, ihm_data=maybe_ihm)
-    return avl_tree
+            ihm = ihm_success(num_features)
+            avl_tree.insert_node(key=ihm.loss, ihm_data=ihm)
+    return avl_tree, failures
 
 
 def map_func(avl_tree: AVLTree, func_to_map: Callable):
