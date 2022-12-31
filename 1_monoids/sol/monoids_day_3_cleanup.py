@@ -59,8 +59,8 @@ class NPDC_Tracker():
 
 def ihm_success(num_features) -> Result:
     time_taken = np.random.rand()
-    features = np.random.rand(num_features)
-    return features, time_taken * 10
+    gradients = np.random.rand(num_features)
+    return gradients, time_taken * 10
 
 
 def ihm_failure():

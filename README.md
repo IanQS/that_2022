@@ -4,6 +4,17 @@ Hi there, thank you for checking out this repo! If you're interested purely in t
 [Setup](#Setup) where we keep the story to a minimum. The material here was made for the TODO: [THAT Conference 2023]()
 but feel free to follow along at home. Hopefully you find this material to be enlightening.
 
+# TL;DR
+
+This [excellent answer](https://stackoverflow.com/a/56601178/3532564) describes, at a very high level, `functors`
+and `monads`
+
+`functors` and `monads` both provide some tool to wrapped input, returning a wrapped output.
+
+- `functor` = map (i.e. the tool)
+
+- `monad` = unit + flatMap (or bind or chain)
+
 # Backstory
 
 ![elf.png](assets/elf.png)

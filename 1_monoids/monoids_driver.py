@@ -6,8 +6,7 @@ from typing import List
 
 import numpy as np
 
-from sol.day_4_monoids import ihm_success, ihm_failure, mdc_processor, npdc_processor, mdc_failure
-
+from sol.monoids_day_4_final import ihm_success, ihm_failure, mdc_processor, npdc_processor, mdc_failure
 
 
 def simulate_ihm(
@@ -22,6 +21,7 @@ def simulate_ihm(
             ihm_results.append(ihm_success(NUM_FEATURES))
     return ihm_results
 
+
 def mdc_run(
     prob_mdc_crash: float,
     prob_ihm_crash: float
@@ -31,11 +31,12 @@ def mdc_run(
     :param crash_proba:
     :return:
     """
-    if np.random.random() <= prob_mdc_crash:
+    if np.random.random() < prob_mdc_crash:
         return mdc_failure()
     num_ihms = np.random.randint(2, 5)
     ihm_results = simulate_ihm(num_ihms, prob_ihm_crash)
     return mdc_processor(ihm_results)
+
 
 if __name__ == '__main__':
     import pprint
@@ -54,4 +55,3 @@ if __name__ == '__main__':
             for mdc in range(NUM_MDCS):
                 mdc_results.append(mdc_run(prob_mdc_crash, prob_ihm_crash))
             pprint.pprint(npdc_processor(mdc_results))
-
