@@ -1,8 +1,7 @@
 """
-
 1) Get the UUIDs associated with each IHM
-2) Expose a function to add arbitrary data to the stored IHM data
-3) Expose a function that allows you to filter arbitrary keys based on some bounds
+2) Expose a function, `map_func`, to add arbitrary data to the stored IHM data
+3) Expose a function, `filter_on_key`, that allows you to filter arbitrary keys based on some bounds
 """
 import uuid
 from dataclasses import dataclass
@@ -22,7 +21,7 @@ class IHM:
 def ihm_success(num_features: int):
     time_taken = np.random.rand()
     gradient = np.random.rand(num_features)
-    ihm_uuid = str(uuid.uuid4())
+    ihm_uuid = str(uuid.uuid4())  # TASK 1
     loss = np.random.randint(1, 100) / 100
     return IHM(gradient, time_taken * 10, ihm_uuid, loss)
 
@@ -31,11 +30,11 @@ def ihm_failure():
     return None
 
 
-def map_func(ihm_list: List[IHM], func_to_map: Callable):
+def map_func(ihm_list: List[IHM], func_to_map: Callable):  # Task 2
     return list(map(func_to_map, ihm_list))
 
 
-def filter_by_func(ihm_list: List[IHM], func_to_filter_with: Callable):
+def filter_by_func(ihm_list: List[IHM], func_to_filter_with: Callable):  # Task 3
     return list(filter(func_to_filter_with, ihm_list))
 
 
