@@ -1,5 +1,8 @@
 """
 Please read the entire file if possible
+
+1) Modify the system to support a binary search tree. An implementation is provided in `avl_tree.py`, which was modified
+   for our problem.
 """
 import uuid
 from dataclasses import dataclass
@@ -16,7 +19,7 @@ def simulate_ihm(
     num_features: int
 ) -> AVLTree:
     """
-    Original Code:
+    NOTE: see how the original code is almost the same as in our modified form
 
     ihm_results = []
     for i in range(num_ihms):
@@ -42,6 +45,7 @@ def map_func(avl_tree: AVLTree, func_to_map: Callable):
     """
     Original Code:
     return list(map(func_to_map, ihm_list))
+
     """
     horizon: List[_TreeNode] = [avl_tree._root]
     new_tree = AVLTree()
@@ -87,7 +91,7 @@ def filter_by_func(avl_tree: AVLTree, func_to_filter_with: Callable):
 
 
 ################################################
-# Ignore below
+# Unchanged below
 ################################################
 
 @dataclass
