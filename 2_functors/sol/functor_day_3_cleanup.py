@@ -42,30 +42,6 @@ def filter_by_func(avl_tree: AVLTree, func_to_filter_with: Callable):
     return avl_tree.filter(func_to_filter_with)
 
 
-################################################
-# Ignore below
-################################################
-
-@dataclass
-class IHM:
-    gradient: np.ndarray
-    time_taken: np.ndarray
-    ihm_uuid: str
-    loss: np.ndarray
-
-
-def ihm_success(num_features: int):
-    time_taken = np.random.rand()
-    gradient = np.random.rand(num_features)
-    ihm_uuid = str(uuid.uuid4())
-    loss = np.random.randint(1, 100) / 100
-    return IHM(gradient, time_taken * 10, ihm_uuid, loss)
-
-
-def ihm_failure():
-    return None
-
-
 def prototype(num_ihms: int, crash_proba: float, num_features: int):
     import copy
     def func_to_map(ihm: IHM, key: str) -> IHM:
@@ -103,3 +79,27 @@ def prototype(num_ihms: int, crash_proba: float, num_features: int):
     r2 = r1.map(f)
     r3 = avl_tree_res.map(f_of_g)
     print("Place debugger at this line")
+
+
+################################################
+# Ignore below
+################################################
+
+@dataclass
+class IHM:
+    gradient: np.ndarray
+    time_taken: np.ndarray
+    ihm_uuid: str
+    loss: np.ndarray
+
+
+def ihm_success(num_features: int):
+    time_taken = np.random.rand()
+    gradient = np.random.rand(num_features)
+    ihm_uuid = str(uuid.uuid4())
+    loss = np.random.randint(1, 100) / 100
+    return IHM(gradient, time_taken * 10, ihm_uuid, loss)
+
+
+def ihm_failure():
+    return None
