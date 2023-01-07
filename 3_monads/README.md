@@ -1,6 +1,7 @@
 # Foreword
 
-We are on to the last portion of our tutorial! Thank you for sticking around and I hope that all of this has been enlightening so far.
+We are on to the last portion of our tutorial! Thank you for sticking around and I hope that all of this has been
+enlightening so far. Conceptually, this code is the 
 
 ## Scenario
 
