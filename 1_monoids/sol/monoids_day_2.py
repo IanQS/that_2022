@@ -1,100 +1,100 @@
 """
 The requests:
 
-
-1) find the fastest and slowest MDCs (to fix up the connection/ bump up the hardware)
-2) find the variance of the IHMs and the MDCs
-
+1) find the fastest and slowest IHMs (to fix up the connection/ bump up the hardware)
+2) find the variance of the gradients and time taken to calculate the gradients
 """
 
-from typing import List, Optional, TypeVar
+from dataclasses import dataclass
+from typing import List, Dict, Any
 
 import numpy as np
 
-Result = TypeVar("Result")
+
+@dataclass
+class IHMResult:
+    time_taken: np.float_
+    gradients: np.ndarray
 
 
-def ihm_success(num_features) -> Result:
+def ihm_success(num_features) -> IHMResult:
     time_taken = np.random.rand()
     gradients = np.random.rand(num_features)
-    return gradients, time_taken * 10
+    return IHMResult(time_taken * 10, gradients)
 
 
 def ihm_failure():
     return None
 
 
-def mdc_failure():
-    return None
-
-
-def mdc_processor(ihm_results):
+def tsp_processor(ihm_results: List[IHMResult]) -> Dict[str, Any]:
     if not ihm_results:
-        return None
+        return {"No successes :( Try running this again": None}
+
     accumulated_gradient = None
     accumulated_sq_gradient = None
-    num_valids = 0
-    ihm_time_tracker = []
-    counter = 0
+    accumulated_time_taken = 0
+    accumulated_sq_time_taken = 0
 
-    for i, result in enumerate(ihm_results):
-        if result is None:
+    total_houses_queried = 0
+    num_failures = 0
+    total_time = 0
+
+    fastest_ihm, fastest_ihm_idx = -float("inf"), None
+    slowest_ihm, slowest_ihm_idx = float("inf"), None
+    for i, single_ihm in enumerate(ihm_results):
+        total_houses_queried += 1
+        if single_ihm is None:
+            num_failures += 1
             continue
-        num_valids += 1
-        counter += 1
-        curr_grad, curr_time = result
-        if accumulated_gradient is None:
-            accumulated_gradient = curr_grad
-            accumulated_sq_gradient = curr_grad ** 2
-        else:
-            accumulated_gradient += curr_grad
-            accumulated_sq_gradient += (curr_grad ** 2)
-        ihm_time_tracker.append(curr_time)
-    num_houses_serviced = len(ihm_results)
-    num_IHMs_failed = num_houses_serviced - num_valids
-    return accumulated_gradient, accumulated_sq_gradient, \
-        num_houses_serviced, num_IHMs_failed, \
-        ihm_time_tracker
-
-
-def npdc_processor(mdc_result_list: List[Optional[Result]]):
-    accumulated_gradient = None
-    all_ihm_times = []
-    mdc_serivced = []
-    max_mdc_time, min_mdc_time = 0, float('inf')
-    ihm_variances = []
-    if not mdc_result_list:
-        return {}
-    for mdc_result in mdc_result_list:
-        if mdc_result is None:
-            continue
-        (curr_grad, curr_sq_grad,
-         curr_tot_runs_for_mdc, curr_ihms_failed_for_mdc,
-         curr_time_tracker) = mdc_result
-
-        curr_num_valid_runs = curr_tot_runs_for_mdc - curr_ihms_failed_for_mdc
-        mdc_serivced.append((curr_tot_runs_for_mdc, curr_ihms_failed_for_mdc))
-        all_ihm_times.extend(curr_time_tracker)
-        max_mdc_time = max(sum(curr_time_tracker), max_mdc_time)
-        min_mdc_time = min(sum(curr_time_tracker), min_mdc_time)
 
         if accumulated_gradient is None:
-            accumulated_gradient = curr_grad
+            accumulated_gradient = single_ihm.gradients
+            accumulated_sq_gradient = single_ihm.gradients ** 2
         else:
-            if curr_grad is None:  # Can happen in the case where the MDC receives all Nones
-                continue
-            else:
-                ihm_variances.append(
-                    (curr_sq_grad / curr_num_valid_runs) -
-                    (curr_grad / curr_num_valid_runs)
-                )
-                accumulated_gradient += curr_grad
+            accumulated_gradient += single_ihm.gradients
+            accumulated_sq_gradient += (single_ihm.gradients ** 2)
+        total_time += single_ihm.time_taken
 
-    to_return = {
-        "accum_grad": accumulated_gradient,
-        "per_mdc_successes_failures": mdc_serivced,
-        "all_times": all_ihm_times,
-        "min_mdc_time": min_mdc_time,
-        "max_mdc_time": max_mdc_time
+        ################################################
+        # Find the fastest and slowest IHM
+        ################################################
+        if single_ihm.time_taken > fastest_ihm:
+            fastest_ihm = single_ihm.time_taken
+            fastest_ihm_idx = i
+        if single_ihm.time_taken < slowest_ihm:
+            slowest_ihm = single_ihm.time_taken
+            slowest_ihm_idx = i
+
+        ################################################
+        # Find the variance of the IHM times
+        ################################################
+        accumulated_time_taken += single_ihm.time_taken
+        accumulated_sq_time_taken += (single_ihm.time_taken ** 2)
+
+    ################################################
+    # Prevent division by 0
+    ################################################
+
+    if (total_houses_queried - num_failures) == 0:
+        ave_time = "NaN "
+        variance_grad = None
+        variance_time = None
+    else:
+        ave_time = total_time / (total_houses_queried - num_failures)
+        num_valid_ihms = total_houses_queried - num_failures
+        variance_grad = (accumulated_sq_gradient / num_valid_ihms) - \
+                        (accumulated_gradient / num_valid_ihms) ** 2
+        variance_time = (accumulated_sq_time_taken / num_valid_ihms) - \
+                        (accumulated_time_taken / num_valid_ihms) ** 2
+
+    return {
+        "Accumulated Gradient": accumulated_gradient,
+        "Average Time Taken": ave_time,
+        "Num IHMs Failed": num_failures,
+        "Slowest time and IHM idx": (slowest_ihm, slowest_ihm_idx),
+        "Fastest time and IHM idx": (fastest_ihm, fastest_ihm_idx),
+        "Gradient Variance": variance_grad,
+        "Time Variance": variance_time,
+        "Num IHMs Success": total_houses_queried - num_failures
     }
-    return to_return

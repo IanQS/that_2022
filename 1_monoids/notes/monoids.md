@@ -1,5 +1,9 @@
 # Monoids
 
+## Monoids 101
+
+## Day 4 discussion
+
 Coming off the brief discussion in [README - day 4 monoids](README.md#day-4--monoids), a Monoid is a structure that
 satisfies two properties:
 

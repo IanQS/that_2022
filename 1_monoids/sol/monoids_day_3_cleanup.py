@@ -1,151 +1,121 @@
 """
-Cleanup!!
+The requests:
+
+1) find the fastest and slowest IHMs (to fix up the connection/ bump up the hardware)
+2) find the variance of the gradients and time taken to calculate the gradients
 """
 
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Dict, Any
 
 import numpy as np
 
-Result = Tuple[np.ndarray, float]
-
-
-################################################
-# Trackers:
-# Code to ensure we are keeping track of everything correctly
-#   - part of the issue is that as requirements get changed, we are liable
-#     to miss out or forget information, which would be disastrous
-################################################
 
 @dataclass
-class MDC_Tracker():
-    accum_grad: np.ndarray
-    accum_sq_grad: np.ndarray
-    num_houses_serviced: int
-    num_IHMs_failed: int
-    ihm_time_tracker: List[float]
-
-    def release(self) -> Tuple:
-        return self.accum_grad, self.accum_sq_grad, \
-            self.num_houses_serviced, self.num_IHMs_failed, \
-            self.ihm_time_tracker
+class IHMResult:
+    time_taken: np.float_
+    gradients: np.ndarray
 
 
-@dataclass
-class NPDC_Tracker():
-    accum_grad: np.ndarray
-    mdc_results: List[Tuple[int, int]]
-    all_times: List[float]
-    min_mdc_time: float
-    max_mdc_time: float
-    grad_variances: List[float]
-
-    def __str__(self):
-        return f"""Accumulated Gradients: {self.accum_grad}
-        MDC Results: {self.mdc_results},
-        All Times: {self.all_times},
-        Min MDC Train Time: {self.min_mdc_time},
-        Max MDC Train Time: {self.max_mdc_time},
-        MDC Gradient Variances: {self.grad_variances}
-        """
-
-    def __repr__(self):
-        return self.__str__()
-
-
-################################################
-# Actual code
-################################################
-
-def ihm_success(num_features) -> Result:
+def ihm_success(num_features) -> IHMResult:
     time_taken = np.random.rand()
     gradients = np.random.rand(num_features)
-    return gradients, time_taken * 10
+    return IHMResult(time_taken * 10, gradients)
 
 
 def ihm_failure():
     return None
 
+class ReduceTracker():
+    def __init__(self):
+        self.accumulated_gradient = None
+        self.accumulated_sq_gradient = None
+        self.accumulated_time_taken = 0
+        self.accumulated_sq_time_taken = 0
 
-def mdc_failure():
-    return None
+        self.total_houses_queried = 0
+        self.num_failures = 0
+
+        self.fastest_ihm, self.fastest_ihm_idx = float("inf"), None
+        self.slowest_ihm, self.slowest_ihm_idx = -float("inf"), None
+
+    @property
+    def num_succeeded(self):
+        return self.total_houses_queried - self.num_failures
+
+    @property
+    def average_time(self) -> np.ndarray:
+        if self.num_succeeded == 0:
+            return np.nan
+        num_valid_ihms = self.num_succeeded
+        ave_time = self.accumulated_time_taken / num_valid_ihms
+        return np.asarray(ave_time)
+
+    @property
+    def variance_grad(self) -> np.ndarray:
+        if self.num_succeeded == 0:
+            return np.nan
+        var_grad = (self.accumulated_sq_gradient / self.num_succeeded) - \
+                   (self.accumulated_gradient / self.num_succeeded) ** 2
+        return np.asarray(var_grad)
+
+    @property
+    def variance_time(self) -> np.ndarray:
+        if self.num_succeeded == 0:
+            return np.nan
+        var_time = (self.accumulated_sq_time_taken / self.num_succeeded) - \
+            (self.accumulated_time_taken / self.num_succeeded) ** 2
+        return np.asarray(var_time)
+
+    ################################################
+    # Prevent division by 0
+    ################################################
+
+    def as_str(self):
+
+        return {
+            "Accumulated Gradient": self.accumulated_gradient,
+            "Average Time Taken": self.average_time,
+            "Num IHMs Failed": self.num_failures,
+            "Slowest time and IHM idx": (self.slowest_ihm, self.slowest_ihm_idx),
+            "Fastest time and IHM idx": (self.fastest_ihm, self.fastest_ihm_idx),
+            "Gradient Variance": self.variance_grad,
+            "Time Variance": self.variance_time,
+            "Num IHMs Success": self.num_succeeded
+        }
 
 
-def mdc_processor(
-    ihm_results: Optional[Result]
-) -> Optional[MDC_Tracker]:
+def tsp_processor(ihm_results: List[IHMResult]) -> Dict[str, Any]:
     if not ihm_results:
-        return None
-    accumulated_gradient = None
-    accumulated_sq_gradient = None
-    num_valids = 0
-    ihm_time_tracker = []
-    counter = 0
-
-    for i, result in enumerate(ihm_results):
-        result: Optional[Tuple[np.ndarray, float]]
-        if result is None:
+        return {"No successes :( Try running this again": None}
+    tracker = ReduceTracker()
+    for i, single_ihm in enumerate(ihm_results):
+        tracker.total_houses_queried += 1
+        if single_ihm is None:
+            tracker.num_failures += 1
             continue
-        num_valids += 1
-        counter += 1
-        curr_grad, curr_time = result
-        if accumulated_gradient is None:
-            accumulated_gradient = curr_grad
-            accumulated_sq_gradient = curr_grad ** 2
+
+        if tracker.accumulated_gradient is None:
+            tracker.accumulated_gradient = single_ihm.gradients
+            tracker.accumulated_sq_gradient = single_ihm.gradients ** 2
         else:
-            accumulated_gradient += curr_grad
-            accumulated_sq_gradient += (curr_grad ** 2)
-        ihm_time_tracker.append(curr_time)
-    num_houses_serviced = len(ihm_results)
-    num_IHMs_failed = num_houses_serviced - num_valids
-    return MDC_Tracker(
-        accumulated_gradient,
-        accumulated_sq_gradient,
-        num_houses_serviced,
-        num_IHMs_failed,
-        ihm_time_tracker
-    )
+            tracker.accumulated_gradient += single_ihm.gradients
+            tracker.accumulated_sq_gradient += (single_ihm.gradients ** 2)
 
+        ################################################
+        # Find the fastest and slowest IHM
+        ################################################
+        if single_ihm.time_taken < tracker.fastest_ihm:
+            tracker.fastest_ihm = single_ihm.time_taken
+            tracker.fastest_ihm_idx = i
+        if single_ihm.time_taken > tracker.slowest_ihm:
+            tracker.slowest_ihm = single_ihm.time_taken
+            tracker.slowest_ihm_idx = i
 
-def npdc_processor(
-    mdc_result_list: Optional[List[Optional[MDC_Tracker]]]
-) -> Optional[NPDC_Tracker]:
-    accum_grad = None
-    all_ihm_times = []
-    mdc_serviced = []
-    max_mdc_time, min_mdc_time = 0, float('inf')
-    ihm_variances = []
-    if not mdc_result_list:
-        return None
-    for mdc_result in mdc_result_list:
-        if mdc_result is None:
-            continue
-        (curr_grad, curr_sq_grad,
-         curr_tot_runs, curr_ihms_failed,
-         curr_time_tracker) = mdc_result.release()
+        ################################################
+        # Find the variance of the IHM times
+        ################################################
+        tracker.accumulated_time_taken += single_ihm.time_taken
+        tracker.accumulated_sq_time_taken += (single_ihm.time_taken ** 2)
 
-        curr_num_valid_runs = curr_tot_runs - curr_ihms_failed
-        mdc_serviced.append((curr_tot_runs, curr_ihms_failed))
-        all_ihm_times.extend(curr_time_tracker)
-        max_mdc_time = max(sum(curr_time_tracker), max_mdc_time)
-        min_mdc_time = min(sum(curr_time_tracker), min_mdc_time)
-        if accum_grad is None:
-            accum_grad = curr_grad
-        else:
-            if curr_grad is None:  # Can happen in the case where the MDC receives all Nones
-                continue
-            else:
-                ihm_variances.append(
-                    (curr_sq_grad / curr_num_valid_runs) -
-                    (curr_grad / curr_num_valid_runs)
-                )
-                accum_grad += curr_grad
-    to_return = NPDC_Tracker(
-        accum_grad,
-        mdc_serviced,
-        all_ihm_times,
-        min_mdc_time,
-        max_mdc_time,
-        ihm_variances
-    )
-    return to_return
+    return tracker.as_str()
