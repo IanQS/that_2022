@@ -20,6 +20,7 @@ category theory)
 3) [Problem Setup](#setup)
     - [Note](#note)
     - [Scenario](#scenario)
+4) [Special Thanks](#thanks)
 
 ## Disclaimer
 
@@ -80,3 +81,9 @@ Let's walk through how the problem might evolve over time and how you can struct
 you don't become this person below.
 
 ![simpson.jpg](assets%2Fsimpson.jpg)
+
+# Thanks
+
+I'd like to thank:
+
+- [Anooj Patel](https://www.linkedin.com/in/nooji/) for his insightful comments and his pointers into cleaning up the material. It would not be where it currently is without his insights.

@@ -190,8 +190,9 @@ class AVLTree:
     def get_min_value(self):
         return self._avl_tree.getMinValueNode(self._root)
 
-    def map(self, func_to_map: Callable):
-        horizon: List[_TreeNode] = [self._root]
+    @staticmethod
+    def map(avl_tree_instance, func_to_map: Callable):
+        horizon: List[_TreeNode] = [avl_tree_instance._root]
         new_tree = AVLTree()
         while horizon:
             curr_node: _TreeNode = horizon.pop()
@@ -204,8 +205,9 @@ class AVLTree:
 
         return new_tree
 
-    def filter(self, func_to_filter_with: Callable):
-        horizon: List[_TreeNode] = [self._root]
+    @staticmethod
+    def filter(avl_tree_instance, func_to_filter_with: Callable):
+        horizon: List[_TreeNode] = [avl_tree_instance._root]
         new_tree = AVLTree()
         while horizon:
             curr_node: _TreeNode = horizon.pop()

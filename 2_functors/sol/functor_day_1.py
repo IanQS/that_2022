@@ -2,72 +2,190 @@
 1) Get the UUIDs associated with each IHM
 2) Expose a function, `map_func`, to add arbitrary data to the stored IHM data
 3) Expose a function, `filter_on_key`, that allows you to filter arbitrary keys based on some bounds
+4) Store the loss so that we can allow `filters`
 """
-import uuid
+
 from dataclasses import dataclass
-from typing import List, Callable
+from typing import List, Dict, Any, Callable
+import uuid
 
 import numpy as np
 
 
 @dataclass
-class IHM:
-    gradient: np.ndarray
-    time_taken: np.ndarray
-    ihm_uuid: str
-    loss: np.ndarray
+class IHMResult:
+    time_taken: np.float_
+    gradients: np.ndarray
+    loss: np.float_  # Requirement 4
+    ihm_uuid: str = ""  # Requirement 1
+
+    def __post_init__(self):
+        self.accumulated_gradient = self.gradients
+        self.accumulated_sq_gradient = self.accumulated_gradient ** 2
+        self.accumulated_time_taken = self.time_taken
+        self.accumulated_sq_time_taken = self.time_taken ** 2
+        self.accumulated_loss = self.loss
+        self.accumulated_sq_loss = self.accumulated_loss ** 2
+
+        self.total_houses_queried = 1
+        self.num_failures = 0
+        self.fastest_ihm = self.time_taken
+        self.slowest_ihm = self.time_taken
+        if self.ihm_uuid:
+            self.ihm_uuid = [self.ihm_uuid]
+        else:
+            self.ihm_uuid = []
+
+    @property
+    def num_succeeded(self):
+        return self.total_houses_queried - self.num_failures
+
+    @property
+    def average_time(self) -> np.ndarray:
+        if self.num_succeeded == 0:
+            return np.nan
+        num_valid_ihms = self.num_succeeded
+        ave_time = self.accumulated_time_taken / num_valid_ihms
+        return np.asarray(ave_time)
+
+    @property
+    def average_loss(self) -> np.ndarray:
+        if self.num_succeeded == 0:
+            return np.nan
+        num_valid_ihms = self.num_succeeded
+        ave_loss = self.accumulated_loss / num_valid_ihms
+        return np.asarray(ave_loss)
+
+    @property
+    def variance_grad(self) -> np.ndarray:
+        if self.num_succeeded == 0:
+            return np.nan
+        var_grad = (self.accumulated_sq_gradient / self.num_succeeded) - \
+                   (self.accumulated_gradient / self.num_succeeded) ** 2
+        return np.asarray(var_grad)
+
+    @property
+    def variance_time(self) -> np.ndarray:
+        if self.num_succeeded == 0:
+            return np.nan
+        var_time = (self.accumulated_sq_time_taken / self.num_succeeded) - \
+                   (self.accumulated_time_taken / self.num_succeeded) ** 2
+        return np.asarray(var_time)
+
+    @property
+    def variance_loss(self) -> np.ndarray:
+        if self.num_succeeded == 0:
+            return np.nan
+        var_loss = (self.accumulated_sq_loss / self.num_succeeded) - \
+                   (self.accumulated_loss / self.num_succeeded) ** 2
+        return np.asarray(var_loss)
+
+    def as_str(self):
+        return {
+            "Accumulated Gradient": self.accumulated_gradient,
+            "Average Time Taken": self.average_time,
+            "Num IHMs Failed": self.num_failures,
+            "Slowest time": self.slowest_ihm,
+            "Fastest time": self.fastest_ihm,
+            "Gradient Variance": self.variance_grad,
+            "Time Variance": self.variance_time,
+            "Num IHMs Success": self.num_succeeded,
+            "UUID": self.ihm_uuid,
+            "Average Loss": self.average_loss,
+            "Loss Variance": self.variance_loss
+        }
+
+    ################################################
+    # Monoid methods
+    ################################################
+
+    @classmethod
+    def make_empty(cls):
+        """
+        For completeness, we set all the fields that were set in the
+            __post_init__. Mostly so users don't need to scroll up
+            to see what fields were set.
+        """
+        to_return = cls(-1, 0, 0)
+        to_return.time_taken = np.inf
+        to_return.gradients = 0  # Was set correctly already
+
+        # Just for completeness
+        to_return.accumulated_gradient = 0
+        to_return.accumulated_sq_gradient = 0
+
+        to_return.accumulated_time_taken = 0
+        to_return.accumulated_sq_time_taken = 0
+
+        to_return.total_houses_queried = 0
+        to_return.num_failures = 0
+
+        to_return.fastest_ihm = np.inf
+        to_return.slowest_ihm = -np.inf
+        to_return.ihm_uuid = []
+        return to_return
+
+    def __add__(self, other: Any):
+        """
+        Doing an in-place update. Because we are doing a reduce, we don't really care about
+            maintaining the original data (which is presumably just GC-ed)
+        """
+        if not isinstance(other, IHMResult):
+            raise Exception(f"Attempting to add IHMResult and {type(other)}")
+        other: IHMResult
+        self.total_houses_queried += other.total_houses_queried
+        self.num_failures += other.num_failures
+
+        self.accumulated_gradient += other.accumulated_gradient
+        self.accumulated_sq_gradient += other.accumulated_sq_gradient
+
+        self.fastest_ihm = min(self.fastest_ihm, other.fastest_ihm)
+        self.slowest_ihm = max(self.slowest_ihm, other.slowest_ihm)
+
+        self.accumulated_time_taken += other.accumulated_time_taken
+        self.accumulated_sq_time_taken += other.accumulated_sq_time_taken
+        self.ihm_uuid += other.ihm_uuid
+
+        self.accumulated_loss += other.accumulated_loss
+        self.accumulated_sq_loss += other.accumulated_sq_loss
+        self.loss += other.loss
+        return self
 
 
-def ihm_success(num_features: int):
-    time_taken = np.random.rand()
-    gradient = np.random.rand(num_features)
-    ihm_uuid = str(uuid.uuid4())  # TASK 1
-    loss = np.random.randint(1, 100) / 100
-    return IHM(gradient, time_taken * 10, ihm_uuid, loss)
-
-
-def ihm_failure():
-    return None
-
-
-def map_func(ihm_list: List[IHM], func_to_map: Callable):  # Task 2
+def map_func(ihm_list: List[IHMResult], func_to_map: Callable):  # Task 2
     return list(map(func_to_map, ihm_list))
 
 
-def filter_by_func(ihm_list: List[IHM], func_to_filter_with: Callable):  # Task 3
+def filter_by_func(ihm_list: List[IHMResult], func_to_filter_with: Callable):  # Task 3
     return list(filter(func_to_filter_with, ihm_list))
 
 
-def prototype(num_ihms: int, crash_proba: float, num_features: int):
-    import copy
-    def func_to_map(ihm: IHM, key: str) -> IHM:
-        new_x = copy.deepcopy(ihm)
-        setattr(new_x, key, np.random.choice([True, False]))
-        return new_x
-
-    def func_to_filter(ihm: IHM) -> bool:
-        return ihm.keep
-
-    ihm_results = simulate_ihm(num_ihms, crash_proba, num_features)
-    print(f"Length of original: {len(ihm_results)}")
-    mapped_over = map_func(ihm_results, lambda x: func_to_map(x, "keep"))
-    filtered_out = filter_by_func(mapped_over, lambda x: func_to_filter(x))
-    print(f"Length of filtered: {len(filtered_out)}")
+def ihm_success(num_features) -> IHMResult:
+    time_taken = np.random.rand()
+    gradients = np.random.rand(num_features)
+    ihm_uuid = str(uuid.uuid4())  # TASK 1
+    loss = np.random.rand() * np.random.rand()  # Task 4
+    return IHMResult(time_taken * 10, gradients, loss, ihm_uuid)
 
 
-################################################
-# Unnecessary to read
-################################################
+def ihm_failure() -> IHMResult:
+    to_return = IHMResult.make_empty()
+    to_return.total_houses_queried = 1
+    to_return.num_failures = 1
+    return to_return
 
 
 def simulate_ihm(
-    num_ihms: int,
-    prob_ihm_crash: float,
-    num_features: int
+        num_ihms: int,
+        prob_ihm_crash: float,
+        num_features
 ) -> List:
+    """
+    SDimulates the accumulation process on our central server
+    """
     ihm_results = []
     for i in range(num_ihms):
-        if np.random.random() < prob_ihm_crash:
+        if np.random.random() <= prob_ihm_crash:
             ihm_results.append(ihm_failure())
         else:
             ihm_results.append(ihm_success(num_features))

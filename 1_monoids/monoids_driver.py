@@ -47,9 +47,6 @@ if __name__ == '__main__':
     import pprint
 
     # Run the northpole-data-center
-    mdc_results = []
-
-    NUM_MDCS = np.random.randint(2, 10)
     NUM_FEATURES = 5
 
     print("Testing across various failure probabilities of ih-home-models for robustness")
