@@ -7,7 +7,7 @@
     - [Functors Day 1](#mvp--feb-1st)
     - [Functors Day 2: Expanding the Requirements](#expanding-the-requirements)
     - [Functors Day 3: AVL Trees? Oh Noooo](#day-3--cleaning-up-our-avl-tree)
-4) [Closing Out](#closing-out)
+3) [Closing Out](#closing-out)
 
 ## Functors Primer
 
@@ -140,8 +140,6 @@ have the same loss (even if it is unlikely). In fact, if you bump up `num_ihms =
 We described a `functor` over the `ihm_results = simulate_ihm(num_ihms, prob_ihm_crash, NUM_FEATURES)` but we could have also defined it over
 the individual `IHMResult`, which would allow for another level of abstraction (which is very cool).
 
-``
-
 ### What IS and isn't a functor?
 
 In theory, a functor is more than "just" a container, it just describes a structure of how to apply functions. Given Haskell's nature, a function 
@@ -152,4 +150,4 @@ is also a functor. Continuing that discussion, are the following functors?
 - `Set`
 - `String`
 
-
+See [notes/what is and isnt a functor solutions](notes/what_is_isnt_functor_solutions.md)

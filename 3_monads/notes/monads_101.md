@@ -1,4 +1,4 @@
-# Functors
+# Monads
 
 ## Table of Contents
 
@@ -16,33 +16,47 @@
 
 ## Intuition
 
-A functor can be thought of as a box. This box wraps some underlying values and we must define a way to map a function
-over the contents of the structure; thus affecting the contents of the box.
+Much like a `functor`, a `monad` can be thought of as a box. In fact, it can be thought of (in a reductionist manner) as
+a functor, but with extra properties and requirements.
+
+As in the case of functors, we describe how you can modify the contents of the box.
 
 ## Class Declaration
 
-An intuition.
+An intuition
 
 ### Haskell Class Declaration
 
 ```haskell
-class Functor Func where
-    fmap :: (T1 -> T2) -> Func T1 -> Func T2
-    (<$) :: T1 -> Func T2 -> Func T1
+class Monad M where
+    (>>=)  :: M T1 -> ( T1 -> M T2) -> M T2
+    return ::   T1 -> M T1
 ```
 
-- The first line describes a function declaration whereby we take a function and a functor (boxing some type, `a`).
+where, as usual, `T1` and `T2` are abstract types. As usual, think of this as the abstract
+base class that must be implemented to be considered a valid monad.
 
-- The second line describes how we can take an initial value and replace values in the `Func T2` with values of
-  type `T1`
+#### `>>=`
+
+This line describes a monad (wrapping an instance of type `T1`), which takes in a function. That function takes a
+type `T1` and
+spits out a type `T2`. It then returns a type of M `T2`.
+
+P.s this function is also known as `flatmap` or `bind` or any other number of names.
+See [extra_credit.md - flatmap](extra_credit.md#flatmap) to
+learn more about why it is called `flatmap`. In that we also discuss why the `(T1 -> M T2)` looks so familiar.
+
+#### return
+
+This operator is also known as `pure` or `unit`, depending on your language.
+
+Think of this method as a way to "wrap up" your abstract thing into a monad. This allows you to then compose functions together willy-nilly without fear.
 
 #### Disclaimer
 
-**Note** We modified the types and the functor definition.
+**Note** We modified the types and the monad definition.
 
 - We modified the types to be more in line with a templated type (as you might see in typed languages)
-- We modify the functor definition to make it more clear that we are wrapping the underlying types. The original functor
-  name was `f` which, for most programmers, evokes thoughts of calling a function on a type `T1`
 
 ## Laws and Properties
 
@@ -157,10 +171,11 @@ class SomeCls():
         return instance_of_SomeCls
 ```
 
-See here how we provide two `fmap` definitions? Over the `d`s and the `c`s? 
+See here how we provide two `fmap` definitions? Over the `d`s and the `c`s?
 
 **Note** If you look online, you'll see the python examples break down a little. This is because
-Python's type system isn't as well built for dynamic dispatch. Consider the following from [Andrew Jarombek's Haskell Part VI: Functors
+Python's type system isn't as well built for dynamic dispatch. Consider the following
+from [Andrew Jarombek's Haskell Part VI: Functors
 ](https://jarombek.com/blog/may-28-2019-haskell-pt6):
 
 ```haskell

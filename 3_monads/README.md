@@ -1,7 +1,17 @@
-# Foreword
+# Welcome to Monads!
 
-We are on to the last portion of our tutorial! Thank you for sticking around and I hope that all of this has been
-enlightening so far. Conceptually, this code is the 
+## Table of Contents
+
+1) [Monads Primer](#monads-primer)
+2) [Scenario](#scenario)
+   - [Monads Day 1](#day-1--revisiting-an-old-friend)
+   - [Monads Day 2]()
+   - [Monads Day 3]
+3) [Closing Out](#closing-out)
+
+## Scenario
+
+## Monads Primer
 
 ## Scenario
 
@@ -16,6 +26,9 @@ debugging? How's that going? The distributed systems team is running into a sack
 
 The question hangs in
 the air before you turn around, point to your laptop and sit down to code. You really have to get this out ASAP
+
+
+## Day 1: Revisiting An Old Friend
 
 ## Day 0: Catching up
 
@@ -48,5 +61,8 @@ Task list
 - `monad_day_1.py`
 
 ## Day 2: Logging
+
+
+## Closing Out
 
 Going back to your conversation with Santa, you decide to add in logging to the code. 

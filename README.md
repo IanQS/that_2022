@@ -86,4 +86,5 @@ you don't become this person below.
 
 I'd like to thank:
 
-- [Anooj Patel](https://www.linkedin.com/in/nooji/) for his insightful comments and his pointers into cleaning up the material. It would not be where it currently is without his insights.
+- [Anooj Patel](https://www.linkedin.com/in/nooji/) for his insightful comments and his pointers into cleaning up the
+  material. It would not be where it currently is without his insights.
