@@ -13,6 +13,8 @@
 
 ## Monads Primer
 
+Please read through [monads_101](notes/monads_101.md)
+
 ## Scenario
 
 Head to the [foreword](foreword.md) and then come back.
@@ -63,6 +65,24 @@ Task list
 ## Day 2: Logging
 
 
+
 ## Closing Out
 
-Going back to your conversation with Santa, you decide to add in logging to the code. 
+And that's it all! Thank you for sticking it through to the end - I know it got dicey at times and you might have wanted
+to bail. But you kept at it and I think that says a lot.
+
+One thing I will leave you with is that it's important to remember that all of these are merely "suggestion"s i.e you
+don't **need** to follow these instructions. In fact, python doesn't
+have a strong typing, which means that implementing some of these will make your code more verbose.
+
+However, I hope that it helps you appreciate abstraction over your thinking. One quote that I quite like is: 
+
+> “Functional languages excel at wholemeal programming, a term coined by Geraint Jones. Wholemeal programming means to
+think big: work with an entire list, rather than a sequence of elements; develop a solution space, rather than an
+individual solution; imagine a graph, rather than a single path. The wholemeal approach often offers new insights or
+provides new perspectives on a given problem. It is nicely complemented by the idea of projective programming: first
+solve a more general problem, then extract the interesting bits and pieces by transforming the general program into more
+specialised ones.”
+
+aka why worry about the small stuff? One really cool idea about this style of programming is that if creating threads or 
+new processes were free, our code could become [Embarrassingly parallel](https://en.wikipedia.org/wiki/Embarrassingly_parallel).

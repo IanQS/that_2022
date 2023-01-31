@@ -50,7 +50,8 @@ learn more about why it is called `flatmap`. In that we also discuss why the `(T
 
 This operator is also known as `pure` or `unit`, depending on your language.
 
-Think of this method as a way to "wrap up" your abstract thing into a monad. This allows you to then compose functions together willy-nilly without fear.
+Think of this method as a way to "wrap up" your abstract thing into a monad. This allows you to then compose functions
+together willy-nilly without fear.
 
 #### Disclaimer
 
@@ -60,143 +61,253 @@ Think of this method as a way to "wrap up" your abstract thing into a monad. Thi
 
 ## Laws and Properties
 
-### Implementation Requirements
-
-As mentioned in the [README.md](README.md),
-
-> A functor must support, [at the minimum, according to Haskell, ](https://wiki.haskell.org/Functor#Syntax), a `fmap`,
-> which describes applying an arbitrary function into the data encapsulated in our class.
-
-### Laws:
-
-[Lookin at the Haskell documentation once again](https://wiki.haskell.org/Functor#Functor_Laws), to be a functor, two
-laws must be satisfied:
+As usual, you can find the following on the [official haskell website](https://wiki.haskell.org/Monad). Below is the
+original form
 
 ```
-1) identity transformations must be preserved
-2) fmap (f . g)  ==  fmap f . fmap g (composition must be respected)
+return a >>= k                  =  k a
+m        >>= return             =  m
+m        >>= (\x -> k x >>= h)  =  (m >>= k) >>= h
+```
+
+but for our discussion we use the attached image as I have restructured this to better fit our discussion and syntax.
+
+### Implementation requirements/ properties
+
+This section is, in my opinion, the hardest part of this entire tutorial; stick with me! I'd recommend looking at the
+RHS first to
+internalize it and then looking at the LHS.
+
+![Monad laws](../../assets/monad_properties.png)
+
+For all the following consider these function signatures/ types
+
+```
+- M be a monad
+- a, b and c be abstract types
+- f: a -> M b
+- g: b -> M c
+```
+
+- `f` maps type `a` to type `M b`
+
+- `g` maps type `b` to type `M c`
+
+#### Left Identity
+
+The **RHS** is basically saying that we get a `M b`
+
+Let's break down the **LHS**
+
+```
+return a >>= f  # we "put" a into a Monad, M
+M a >>= f       # we then do a "bind" i.e apply f to a
+M (f a)         # we then apply f onto a 
+M (M b)         # by the flat
+M b             
+```
+
+and we see that the two are equivalent!
+
+#### Right Identity
+
+This is far simpler than the above. The **RHS** is just a monad **around a type**. The LHS is
+
+```
+lets assume that the monad M wraps some type
+---
+M a >>= return  # apply the return to the a i.e put a into a box
+M M a  # Applying the return
+M a    # the "flat" part of our flatmap
+M      # our monad around some arbitrary type
+```
+
+and we see that the two are equivalent!
+
+#### Associativity
+
+The intuition here is that we want to know that applying the `bind` is equivalent to applying the
+first function (on the contents) and binding on that.
+
+Looking at the **RHS** this is equivalent to `g(f(M a))` i.e.
+
+```
+M a >>= f >>= g  # adding in the "a" i.e. the contained type
+M (M b) >>= g    # applying "f"
+M b >>= g        # applying g
+M c
+```
+
+and looking at the **LHS**:
+
+```
+M >>= (\x -> f x >>= g)  # \x -> x means that for all x's we apply f to it. These x's are not contained
+M >>= (\x -> (g(f(x)))   # restating it in "python" terms to be easier for our intended audience, you ;) 
+M >>= (\x -> h)          # such that h = g f x where 
+M c
 ```
 
 ## Examples
 
-### Over a list
+### Lists!?!
 
-As we can see, the  `fmap` for a list is basically the `map`
+Yes, a list is definitely a `monad` :) It's crazy how it pops up everywhere, isn't it? Let's break it down; as before,
+we assume that
+we had no notion of a list monad. How might we "define" one?
 
-```python
-from typing import Callable, List, TypeVar
-
-T1 = TypeVar("T1")
-T2 = TypeVar("T2")
-
-
-def our_list_map(
-        incoming_list: List[T1],
-        func: Callable[[T1], T2]
-):
-    return [func(el) for el in incoming_list]
-# OR map(func, incoming_list)
-```
-
-### A Binary Search Tree
-
-And here we use a binary-search-tree
+**Note**: we could circularly define this with a built-in python list, but that's honestly not as interesting.
 
 ```python
 
-from typing import Callable, TypeVar
-
-T1 = TypeVar("T1")
-T2 = TypeVar("T2")
-
-
-class BinarySearchTree:
+class List:
     def __init__(self):
-        ...
+        self.data = {}
+        self.max_idx = 0
 
-    @staticmethod
-    def fmap(
-            func_to_apply: Callable[[T1], T2],
-            bst_instance: "BinarySearchTree"
-    ):
-        horizon = [bst_instance.root]
-        while horizon:
-            curr_node = horizon.pop()
-            if curr_node:
-                curr_node.data = func_to_apply(curr_node.data)
-                horizon.append(curr_node.left)
-                horizon.append(curr_node.right)
-        return bst_instance
+    @classmethod
+    def pure(cls, x):
+        if isinstance(x, List):
+            return x
+        else:
+            to_return = cls()
+            to_return.data[to_return.max_idx] = x
+            to_return.max_idx += 1
+            return to_return
+
+    def __getitem__(self, idx):
+        if not isinstance(idx, int):
+            raise TypeError("Trying to index a list with a non-integer value")
+        if idx not in self.data:
+            raise IndexError("Indexing out of bounds")
+        return self.data[idx]
+
+    def bind(self, some_func):
+        to_store = {}
+        to_return = List()
+        for i in range(self.max_idx):
+            store_val = some_func(self.data[i])
+            if not isinstance(store_val, List):
+                raise TypeError("Function supplied to bind must return a Monad instance")
+            to_store[i] = store_val.data[0]  # If not, we return a nested Monad
+
+        to_return.data = to_store
+        to_return.max_idx = i
+        return to_return
 ```
 
-### A Custom Class
+### Option
 
-However, the benefit of a functor is rather limited if all we can do is apply it
-to built-in types. So, consider the following simple example:
+An option is a concept from [Rust](https://www.rust-lang.org/). As much as I love Rust, I'll spare you from my gushing
+about it. Just keep the following in mind:
+
+![](../../assets/rusty_boi.jpg)
+
+and maybe give it a shot one day.
+
+#### Option Motivation
+
+Remember that I said that we want to focus on abstraction and operate at a "higher level"? We don't want to think of the
+elements in a list, we want to just think of the list as an abstract object. We don't want to think of it as a list
+even, we want to just think of it as something that obeys certain properties. An option type allows us to accomplish
+this.
+
+Instead of worrying about a `None` or a `Null`, or even a sentinel value (e.g. when searching an iterable for a value,
+if we cannot find it we return a `-1` or a `False`),
+we just want to think of these structures as a "blob". You, the developer of the language/library/module handle valid
+states - I just use your creation.
 
 ```python
-from typing import Callable, List, TypeVar
-
-T1 = TypeVar("T1")
-T2 = TypeVar("T2")
+from abc import ABC, abstractmethod
 
 
-class SomeCls():
+class OptionMonad(ABC):
     def __init__(self):
-        self.d1 = "d1"
-        self.d2 = "d2"
-        self.c1 = "c1"
-        self.c2 = "c2"
+        self.data = None
 
-    @staticmethod
-    def fmap_d(
-            func_to_apply: Callable[[T1], T2],
-            instance_of_SomeCls: "SomeCls"
-    ):
-        instance_of_SomeCls.d1 = func_to_apply(instance_of_SomeCls.d1)
-        instance_of_SomeCls.d2 = func_to_apply(instance_of_SomeCls.d2)
-        return instance_of_SomeCls
+    @abstractmethod
+    def bind(self, func):
+        pass
 
-    @staticmethod
-    def fmap_c(
-            func_to_apply: Callable[[T1, T1], T2],
-            instance_of_SomeCls: "SomeCls"
-    ):
-        """
-        Calls our func_to_apply on (c1, c2) and alters c1
-        """
-        instance_of_SomeCls.c1 = func_to_apply(
-            instance_of_SomeCls.c1,
-        )
-        return instance_of_SomeCls
+    @classmethod
+    @abstractmethod
+    def pure(cls, value=None):
+        pass
+
+
+class NoneOption(OptionMonad):
+    def __init__(self):
+        super().__init__()
+
+    def bind(self, func):
+        return NoneOption()
+
+    @classmethod
+    def pure(cls):
+        return NoneOption()
+
+    def __str__(self):
+        return f"None"
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class SomeOption(OptionMonad):
+    def __init__(self):
+        super().__init__()
+
+    def bind(self, func):
+        must_be_some_option = func(self.data)
+        if not isinstance(must_be_some_option, SomeOption):
+            raise Exception("Function given to bind of SomeOption must return an instance of SomeOption")
+        return must_be_some_option
+
+    @classmethod
+    def pure(cls, value):
+        to_return = cls()
+        to_return.data = value
+        return to_return
+
+    def __str__(self):
+        return f"Some({self.data})"
+
+    def __repr__(self):
+        return self.__str__()
 ```
 
-See here how we provide two `fmap` definitions? Over the `d`s and the `c`s?
+The above is a rough definition of an `Option` type. See how we handle the case for a None where we don't have to worry about the individual elements? We just "run" things
 
-**Note** If you look online, you'll see the python examples break down a little. This is because
-Python's type system isn't as well built for dynamic dispatch. Consider the following
-from [Andrew Jarombek's Haskell Part VI: Functors
-](https://jarombek.com/blog/may-28-2019-haskell-pt6):
+```python
+a = [
+    NoneOption(),
+    SomeOption.pure(3),
+    NoneOption(),
+    SomeOption.pure(10),
+    NoneOption(),
+    NoneOption(),
+    SomeOption.pure(5),
+]
 
-```haskell
-data Distance a = Miles a | Kilometers a | Meters a
-                  deriving (Show, Read)
-                  
-instance Functor Distance where
-  -- fmap :: (a -> b) -> Distance a -> Distance b
-  fmap f (Miles x) = Miles (f x)
-  fmap f (Kilometers x) = Kilometers (f x)
-  fmap f (Meters x) = Meters (f x)
+def act_on_option(optional):
+    return optional.bind(lambda x: SomeOption.pure(x + 5))
+
+print(list(map(
+    lambda single_option: act_on_option(single_option),
+    a
+)))
+
+"""
+On my machine it prints out
+
+[None, Some(8), None, Some(15), None, None, Some(10)]
+
+which seems right!
+"""
 ```
 
-Notice how, depending on the "type" of distance, we can apply the `fmap` differently?
+Now, all we have to do is use this for our section on monads and we're done!
 
 ## Closing Out
 
-And that's the power of a functor - it lets us abstract over containers of things. They let us "swap" out the
-underlying "backend" (data structure) while still preserving a similar interface, as well as allowing our end user to
-ignore the underlying implementation details.
-
-As long as our end-user uses code that "obeys"
-our requirements (function signatures), they do not need to care about how we do things in the background. For example,
-see how in `sol/functor_day_1.py`, our implementation was "hardcoded" to a `List`? Not anymore!
+And that's pretty much all you need to know! Now head on back to [the top level readme](../README.md) to wrap this
+tutorial up!

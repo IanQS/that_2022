@@ -13,10 +13,7 @@ and `monads`
 
 - `functor` = map (i.e., the tool)
 
-- `monad` = unit + bind
-
-**Note** we removed the `(>>)` from `Monads` and `(<$)` from `Functor` as they aren't as relevant for our discussion in
-this tutorial.
+- `Monad` = unit + flatMap (or bind or chain)
 
 ### Recap: Functor
 
@@ -26,12 +23,15 @@ An abstract class definition is like the following:
 class Functor F where
     fmap :: (a -> b) -> F a -> F b
     (<$) :: a -> F b -> F a
-    # ^ we don't cover this
 ```
 
 > `fmap`
 
 The fmap describes how you can apply a function, `func`, to the contents of the `functor`.
+
+> `<$`
+
+Describes how you can take an initial value and replace the contents of an existing functor with it (we do not cover this)
 
 ### Recap: Monad
 
@@ -41,6 +41,8 @@ An abstract class definition is like the following:
 class Monad M where
   (>>=)  :: M a -> (  a -> M b) -> M b
   return ::   a                 -> M a
+  (>>)   :: m a ->  m b         -> m b
+  ^ we don't actually cover this
 ```
 
 > `>>=`
@@ -48,8 +50,17 @@ class Monad M where
 describes how for a given structure, `M`, we can take a function and operate on the internal contents of the type. Note
 that, unlike the `fmap`, our return value is the Monad, not the to-be-wrapped value.
 
-## Further discussion
+> `return`
 
-In the first "line" of both classes, we are "defining an interface" that describes how we "open" the structure and apply
-the functions.
+create an instance of the monad from an initial value
 
+## Differences
+
+We see that both structures offer an abstract way to "apply" the internal function to the instances. Both also offer
+a way to create an instance from existing values, albeit in different ways.
+
+Something worth noting is that a monad is a more "powerful" (and restricted) functor, because all monads are functors.
+
+# Closing out
+
+A monad is "just" a functor with more requirements
