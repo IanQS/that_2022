@@ -25,7 +25,16 @@ def simulate_ihm(
         else:
             maybe_ihm = OptionalIHM(ihm_success(num_features))
             loss = maybe_ihm.ihm_data.loss
-        avl_tree.insert_node(key=loss, ihm_data=maybe_ihm)
+        try:
+            avl_tree.insert_node(key=loss, ihm_data=maybe_ihm)
+        except AttributeError as e:
+            CRED = '\033[91m'
+            CEND = '\033[0m'
+            msg = "In Simulate IHM. Error in insertion likely because two of our losses have the same value, which our AVLTree does not support"
+            print(CRED + msg + CEND)
+        except Exception as e:
+            print("Uncaught exception in AVLTree insert_node")
+            raise e
 
     def f1(definitely_ihm: IHM) -> Union[IHM, None]:
         definitely_ihm.ihm_uuid = f"Added to UUID: {definitely_ihm.ihm_uuid}"
