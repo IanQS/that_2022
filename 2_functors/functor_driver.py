@@ -38,10 +38,10 @@ def apply_functions_to_ihms(
         return True
 
     ################################################
-    # Apply the
+    # Apply the functions
     ################################################
 
-    mapped_ihms = AVLTree.map(ihm_results, add_random_proba)
+    mapped_ihms = AVLTree.fmap(ihm_results, add_random_proba)
     filtered_ihms = AVLTree.filter(mapped_ihms, filter_func)
 
     if verbose:

@@ -6,7 +6,7 @@ from typing import List, Callable
 
 # Create a tree node
 class _TreeNode(object):
-    def __init__(self, key, maybe_ihm: "MaybeIhm"):
+    def __init__(self, key, maybe_ihm: "OptionalIHM"):
         self.key = key
         self.left = None
         self.right = None
@@ -190,7 +190,7 @@ class AVLTree:
     def get_min_value(self):
         return self._avl_tree.getMinValueNode(self._root)
 
-    def map(self, func_to_map: Callable):
+    def fmap(self, func_to_map: Callable):
         horizon: List[_TreeNode] = [self._root]
         new_tree = AVLTree()
         while horizon:
@@ -228,19 +228,3 @@ class AVLTree:
                 horizon.append(curr_node.right)
 
         return new_tree
-
-
-def apply_map(avl_tree: AVLTree, func_to_map: Callable):
-    """
-    Original Code:
-    return list(map(func_to_map, ihm_list))
-    """
-    return avl_tree.map(func_to_map)
-
-
-def apply_filter(avl_tree: AVLTree, func_to_filter_with: Callable):
-    """
-    Original Code:
-    return list(filter(func_to_map, ihm_list))
-    """
-    return avl_tree.filter(func_to_filter_with)

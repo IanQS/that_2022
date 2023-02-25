@@ -46,39 +46,17 @@ def simulate_ihm(
 
     print("\t-Uncomment the debug lines in monad_day_1.simulate_ihm to investigate the tree")
     # avl_tree.debug()
-    new_tree = avl_tree.map(
+    new_tree = avl_tree.fmap(
         f1
     )
 
     # new_tree.debug()
-    new_tree = new_tree.map(
+    new_tree = new_tree.fmap(
         f2
     )
     # new_tree.debug()
 
     return new_tree
-
-
-def map_func(avl_tree: AVLTree, func_to_map: Callable):
-    """
-    Original Code:
-    return list(map(func_to_map, ihm_list))
-    """
-    return avl_tree.map(func_to_map)
-
-
-def filter_by_func(avl_tree: AVLTree, func_to_filter_with: Callable):
-    """
-    Original Code:
-    return list(filter(func_to_map, ihm_list))
-    """
-    return avl_tree.filter(func_to_filter_with)
-
-
-################################################
-# Ignore below
-################################################
-
 
 @dataclass
 class IHM:

@@ -191,7 +191,7 @@ class AVLTree:
         return self._avl_tree.getMinValueNode(self._root)
 
     @staticmethod
-    def map(avl_tree_instance, func_to_map: Callable):
+    def fmap(avl_tree_instance, func_to_map: Callable):
         horizon: List[_TreeNode] = [avl_tree_instance._root]
         new_tree = AVLTree()
         while horizon:

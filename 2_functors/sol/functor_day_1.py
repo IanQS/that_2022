@@ -152,14 +152,6 @@ class IHMResult:
         return self
 
 
-def map_func(ihm_list: List[IHMResult], func_to_map: Callable):  # Task 2
-    return list(map(func_to_map, ihm_list))
-
-
-def filter_by_func(ihm_list: List[IHMResult], func_to_filter_with: Callable):  # Task 3
-    return list(filter(func_to_filter_with, ihm_list))
-
-
 def ihm_success(num_features) -> IHMResult:
     time_taken = np.random.rand()
     gradients = np.random.rand(num_features)

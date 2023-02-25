@@ -7,7 +7,6 @@
     - [Monads Day 0](#day-0--catching-up)
     - [Monads Day 1](#day-1--error-handling-is--optional)
     - [Monads Day 2](#day-2--logging)
-    - [Monads Day 3]
 3) [Closing Out](#closing-out)
 
 ## Monads Primer
@@ -22,8 +21,7 @@ After a successful interview with the big man himself (this was mostly a formali
 Workshop", Santa's R&D branch. You stare out the window of your office, marveling at how quickly your career has
 progressed. Just then, Santa himself comes running in to the office.
 
-> "The distributed ML team is running into a sackload of issues. I need you to talk to them and fix it- no time for R&D
-> now"
+> "The distributed ML team is running into a sackload of issues. I need you to talk to them and fix it ASAP.
 
 ![Sack of problems](../assets/big_sack_of_problems.jpg)
 
@@ -43,12 +41,16 @@ that their debugging process has been a nightmare. They've got two main issues:
 
 Lets dig into these issues more
 
+N.B.: we deal with a simplified `IHMResult` that was defined in the functor section. We don't use any of the implemented
+functions,
+and our code is just far cleaner this way.
+
 ### Unified Data Structure
 
 Yes, they can map functions over both structures in a unified way thanks to your introduction of functors, but they'd
 rather have a single structure and abstract things away.
 
-NB: This might seem unrelated to monads but I promise you that it sets up the problem quite nicely. To address this
+NB: This might seem unrelated to monads, but I promise you that it sets up the problem quite nicely. To address this
 portion, we'll need a way to wrap the `None` and the `Something`-ness.
 
 ### Logging Issues
@@ -58,9 +60,9 @@ if-else's and all that),
 various transformations happen. Using a `filter` isn't always the best idea because, as before, you don't want to end up
 with different data (yes, the plural) floating around.
 
-TL;DR things have been a nightmare and you dug us into this hole now get us out ()
+TL;DR things have been a nightmare, and you dug us into this hole now get us out ()
 
-They've got functions calling functions and they need a way to pass
+They've got functions calling functions, and they need a way to pass
 around logs. Your
 `Monoids` and `Functors` have been extremely useful, but the team has ended up passing around lots of data and it is
 difficult to maintain. Typically, they'd just overload the `__repr__` and `__str__` methods, but it's a little messy
@@ -72,15 +74,16 @@ point.
 
 ## Day 1: Error handling is ... Optional?
 
-You decide to tackle the issue of having the `None` values being stored in a separate data-structure. Ideally, they all
-sit in the same place.
-
-Task list
+You decide to tackle the first issue: unifying the data structure to return a single object instead of a tuple. Your
+goals:
 
 ```
 0) Modify the avl_tree class and IHM class to allow None-insertions
 1) modify `map` to account for ^
 ```
+
+As mentioned before, we deal with a simplified `IHMResult` that was defined in the functor section. We don't use any of
+the implemented functions, and our code is just far cleaner this way.
 
 ### A solution
 
@@ -121,6 +124,18 @@ Optional". This is important BECAUSE we build off this for the next portion.
 
 ## Day 2: Logging
 
+With that out of the way, you rush to fix up the logging issues. Since each datum **might** go through a different path
+depending on the values, it's probably better to just attach
+the logs onto each value to trace where exactly in the branches it goes.
+
+```
+0) Track the path each datum goes through
+```
+
+### A solution
+
+Check out [monad_day_2.py](sol/monad_day_2.py) specifically
+
 ## Closing Out
 
 That's all, folks! Thank you for sticking it through to the end - I know it got dicey at times and you might have wanted
@@ -130,7 +145,8 @@ One thing I will leave you with is that it's important to remember that all of t
 don't **need** to follow these instructions. In fact, python doesn't
 have a strong typing, which means that implementing some of these will make your code more verbose.
 
-However, I hope that it helps you appreciate abstraction in how you think about your code. One quote that I quite like is:
+However, I hope that it helps you appreciate abstraction in how you think about your code. One quote that I quite like
+is:
 
 > “Functional languages excel at wholemeal programming, a term coined by Geraint Jones. Wholemeal programming means to
 > think big: work with an entire list, rather than a sequence of elements; develop a solution space, rather than an
@@ -146,8 +162,10 @@ become [Embarrassingly parallel](https://en.wikipedia.org/wiki/Embarrassingly_pa
 
 ### Extra Credit
 
-Try and work out what exactly the differences are between functors and monads (look at their signatures). If you recall from our earlier discussion on [monoids](../1_monoids/README.md#dec-29th--monoids), we mentioned
+Try and work out what exactly the differences are between functors and monads (look at their signatures). If you recall
+from our earlier discussion on [monoids](../1_monoids/README.md#dec-29th--monoids), we mentioned
 
 > A monad is just a monoid in the category of endofunctors, what's the problem?
 
-so there's clearly SOME relation between them. Check it out and then work your way through our discussion: [Functors v. Monads](notes/functors_monads.md)
+so there's clearly SOME relation between them. Check it out and then work your way through our
+discussion: [Functors v. Monads](notes/functors_monads.md)
