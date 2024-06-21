@@ -25,7 +25,16 @@ def simulate_ihm(
         else:
             maybe_ihm = OptionalIHM(ihm_success(num_features))
             loss = maybe_ihm.ihm_data.loss
-        avl_tree.insert_node(key=loss, ihm_data=maybe_ihm)
+        try:
+            avl_tree.insert_node(key=loss, ihm_data=maybe_ihm)
+        except AttributeError as e:
+            CRED = '\033[91m'
+            CEND = '\033[0m'
+            msg = "In Simulate IHM. Error in insertion likely because two of our losses have the same value, which our AVLTree does not support"
+            print(CRED + msg + CEND)
+        except Exception as e:
+            print("Uncaught exception in AVLTree insert_node")
+            raise e
 
     def f1(definitely_ihm: IHM) -> Union[IHM, None]:
         definitely_ihm.ihm_uuid = f"Added to UUID: {definitely_ihm.ihm_uuid}"
@@ -37,39 +46,17 @@ def simulate_ihm(
 
     print("\t-Uncomment the debug lines in monad_day_1.simulate_ihm to investigate the tree")
     # avl_tree.debug()
-    new_tree = avl_tree.map(
+    new_tree = avl_tree.fmap(
         f1
     )
 
     # new_tree.debug()
-    new_tree = new_tree.map(
+    new_tree = new_tree.fmap(
         f2
     )
     # new_tree.debug()
 
     return new_tree
-
-
-def map_func(avl_tree: AVLTree, func_to_map: Callable):
-    """
-    Original Code:
-    return list(map(func_to_map, ihm_list))
-    """
-    return avl_tree.map(func_to_map)
-
-
-def filter_by_func(avl_tree: AVLTree, func_to_filter_with: Callable):
-    """
-    Original Code:
-    return list(filter(func_to_map, ihm_list))
-    """
-    return avl_tree.filter(func_to_filter_with)
-
-
-################################################
-# Ignore below
-################################################
-
 
 @dataclass
 class IHM:

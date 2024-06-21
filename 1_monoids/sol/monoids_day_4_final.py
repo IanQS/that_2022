@@ -1,176 +1,140 @@
 """
-Using Monoids!!
+The requests:
+
+1) find the fastest and slowest IHMs (to fix up the connection/ bump up the hardware)
+2) find the variance of the gradients and time taken to calculate the gradients
 """
 
-from dataclasses import dataclass, field
-from typing import List, Optional, TypeVar, Tuple
+from dataclasses import dataclass
+from typing import List, Dict, Any
 
 import numpy as np
 
-Result = TypeVar("Result")
-
-
-################################################
-# Trackers:
-# Code to ensure we are keeping track of everything correctly
-#   - part of the issue is that as requirements get changed, we are liable
-#     to miss out or forget information, which would be disastrous
-################################################
 
 @dataclass
-class MDC_Monoid():
-    accum_grad: np.ndarray = np.empty(())
-    accum_sq_grad: np.ndarray = np.empty(())
-    num_houses_serviced: int = 0
-    num_IHMs_failed: int = 0
-    ihm_time_tracker: List[float] = field(default_factory=list)
+class IHMResult:
+    time_taken: np.float_
+    gradients: np.ndarray
+
+    def __post_init__(self):
+        self.accumulated_gradient = self.gradients
+        self.accumulated_sq_gradient = self.accumulated_gradient ** 2
+        self.accumulated_time_taken = self.time_taken
+        self.accumulated_sq_time_taken = self.time_taken ** 2
+
+        self.total_houses_queried = 1
+        self.num_failures = 0
+        self.fastest_ihm = self.time_taken
+        self.slowest_ihm = self.time_taken
+
+    @property
+    def num_succeeded(self):
+        return self.total_houses_queried - self.num_failures
+
+    @property
+    def average_time(self) -> np.ndarray:
+        if self.num_succeeded == 0:
+            return np.nan
+        num_valid_ihms = self.num_succeeded
+        ave_time = self.accumulated_time_taken / num_valid_ihms
+        return np.asarray(ave_time)
+
+    @property
+    def variance_grad(self) -> np.ndarray:
+        if self.num_succeeded == 0:
+            return np.nan
+        var_grad = (self.accumulated_sq_gradient / self.num_succeeded) - \
+                   (self.accumulated_gradient / self.num_succeeded) ** 2
+        return np.asarray(var_grad)
+
+    @property
+    def variance_time(self) -> np.ndarray:
+        if self.num_succeeded == 0:
+            return np.nan
+        var_time = (self.accumulated_sq_time_taken / self.num_succeeded) - \
+                   (self.accumulated_time_taken / self.num_succeeded) ** 2
+        return np.asarray(var_time)
+
+    def as_str(self):
+        return {
+            "Accumulated Gradient": self.accumulated_gradient,
+            "Average Time Taken": self.average_time,
+            "Num IHMs Failed": self.num_failures,
+            "Slowest time": self.slowest_ihm,
+            "Fastest time": self.fastest_ihm,
+            "Gradient Variance": self.variance_grad,
+            "Time Variance": self.variance_time,
+            "Num IHMs Success": self.num_succeeded
+        }
+
+    ################################################
+    # Monoid methods
+    ################################################
 
     @classmethod
-    def make(cls,
-             maybe_val: Optional[Result]
-             ):
+    def make_empty(cls):
         """
-        To make our maybe val which tracks IHM accumulations
-            whether those IHMs failed, or not
-        :param maybe_val:
-        :return:
+        For completeness, we set all the fields that were set in the
+            __post_init__. Mostly so users don't need to scroll up
+            to see what fields were set.
         """
-        if maybe_val is None:
-            to_ret = cls()
-            to_ret.num_houses_serviced += 1
-            to_ret.num_IHMs_failed += 1
-            return to_ret
-        accum_grad, ihm_time = maybe_val
-        return cls(
-            accum_grad=accum_grad,
-            accum_sq_grad=accum_grad ** 2,
-            num_houses_serviced=1,
-            num_IHMs_failed=0,
-            ihm_time_tracker=[ihm_time]
-        )
+        to_return = cls(-1, 0)
+        to_return.time_taken = np.inf
+        to_return.gradients = 0  # Was set correctly already
 
-    def __add__(self, other: Optional["MDC_Monoid"]) -> "MDC_Monoid":
-        if other is None:
-            return self
-        return MDC_Monoid(
-            accum_grad=self.accum_grad + other.accum_grad,
-            accum_sq_grad=self.accum_sq_grad + other.accum_sq_grad,
-            num_houses_serviced=self.num_houses_serviced + other.num_houses_serviced,
-            num_IHMs_failed=self.num_IHMs_failed + other.num_IHMs_failed,
-            ihm_time_tracker=self.ihm_time_tracker + other.ihm_time_tracker
-        )
+        # Just for completeness
+        to_return.accumulated_gradient = 0
+        to_return.accumulated_sq_gradient = 0
 
+        to_return.accumulated_time_taken = 0
+        to_return.accumulated_sq_time_taken = 0
 
-@dataclass
-class NPDC_Monoid():
-    accum_grad: np.ndarray = np.empty(())
-    mdc_results: List[Tuple[int, int]] = field(default_factory=list)
-    all_times: List[float] = field(default_factory=list)
-    min_mdc_time: float = float('inf')
-    max_mdc_time: float = 0
-    grad_variances: List[float] = field(default_factory=list)
+        to_return.total_houses_queried = 0
+        to_return.num_failures = 0
 
-    @classmethod
-    def make(cls,
-             maybe_MDC_monoid: Optional[MDC_Monoid]
-             ):
+        to_return.fastest_ihm = np.inf
+        to_return.slowest_ihm = -np.inf
+        return to_return
+
+    def __add__(self, other: Any):
         """
-        To make our maybe val which tracks IHM accumulations
-            whether those IHMs failed, or not
-        :param maybe_MDC_monoid:
-        :return:
+        Doing an in-place update. Because we are doing a reduce, we don't really care about
+            maintaining the original data (which is presumably just GC-ed)
         """
-        if maybe_MDC_monoid is None:
-            return cls()
-        mdc_monoid = maybe_MDC_monoid
-        valid_runs = mdc_monoid.num_houses_serviced - mdc_monoid.num_IHMs_failed
-        if valid_runs == 0:
-            variance = np.nan
-        else:
-            variance = (mdc_monoid.accum_sq_grad / valid_runs) - \
-                       (mdc_monoid.accum_grad / valid_runs)
+        if not isinstance(other, IHMResult):
+            raise Exception(f"Attempting to add IHMResult and {type(other)}")
+        other: IHMResult
+        self.total_houses_queried += other.total_houses_queried
+        self.num_failures += other.num_failures
 
-        time_tracker = mdc_monoid.ihm_time_tracker
-        if len(time_tracker) == 0:
-            # Use the default
-            min_time = cls.min_mdc_time
-            max_time = cls.max_mdc_time
-        else:
-            min_time = min(time_tracker)
-            max_time = max(time_tracker)
+        self.accumulated_gradient += other.accumulated_gradient
+        self.accumulated_sq_gradient += other.accumulated_sq_gradient
 
-        return cls(
-            accum_grad=mdc_monoid.accum_grad,
-            mdc_results=[(valid_runs, mdc_monoid.num_IHMs_failed)],
-            all_times=mdc_monoid.ihm_time_tracker,
-            min_mdc_time=min_time,
-            max_mdc_time=max_time,
-            grad_variances=[variance]
-        )
+        self.fastest_ihm = min(self.fastest_ihm, other.fastest_ihm)
+        self.slowest_ihm = max(self.slowest_ihm, other.slowest_ihm)
 
-    def __add__(self, other: Optional["NPDC_Monoid"]) -> "NPDC_Monoid":
-        if other is None:
-            return self
-        return NPDC_Monoid(
-            accum_grad=self.accum_grad + other.accum_grad,
-            mdc_results=self.mdc_results + other.mdc_results,
-            all_times=self.all_times + other.all_times,
-            min_mdc_time=min(self.min_mdc_time, other.min_mdc_time),
-            max_mdc_time=max(self.max_mdc_time, other.max_mdc_time),
-            grad_variances=self.grad_variances + other.grad_variances
-        )
-
-    def __str__(self):
-        successes = 0
-        failures = 0
-        for el in self.mdc_results:
-            successes += el[0]
-            failures += el[1]
-        to_ret = f"Across {len(self.mdc_results)} MDCs with {successes} successes and {failures} failures\n"
-        to_ret += f"\tAccumulated Gradients: {self.accum_grad}\n"
-        to_ret += f"\tMDC Results: {self.mdc_results}\n"
-        to_ret += f"\tAll Times: {self.all_times}\n"
-        to_ret += f"\tMin MDC Train Time: {self.min_mdc_time}\n"
-        to_ret += f"\tMax MDC Train Time: {self.max_mdc_time}\n"
-        to_ret += f"\tMDC Gradient Variances: {self.grad_variances}"
-        return to_ret
-
-    def __repr__(self):
-        return self.__str__()
+        self.accumulated_time_taken += other.accumulated_time_taken
+        self.accumulated_sq_time_taken += other.accumulated_sq_time_taken
+        return self
 
 
-################################################
-# Code that the end-user sees
-################################################
-
-def ihm_success(num_features) -> Result:
+def ihm_success(num_features) -> IHMResult:
     time_taken = np.random.rand()
     gradients = np.random.rand(num_features)
-    return gradients, time_taken * 10
+    return IHMResult(time_taken * 10, gradients)
 
 
-def ihm_failure():
-    return None
+def ihm_failure() -> IHMResult:
+    to_return = IHMResult.make_empty()
+    to_return.total_houses_queried = 1
+    to_return.num_failures = 1
+    return to_return
 
 
-def mdc_failure():
-    return None
-
-
-def mdc_processor(ihm_results: List[Optional[Result]]) -> MDC_Monoid:
-    mdc_tracker = MDC_Monoid()
+def tsp_processor(ihm_results: List[IHMResult]) -> Dict[str, Any]:
     if not ihm_results:
-        return mdc_tracker
-    for i, result in enumerate(ihm_results):
-        mdc_tracker += MDC_Monoid.make(result)
-    return mdc_tracker
-
-
-def npdc_processor(mdc_result_list: List[Optional[Result]]):
-    npdc_tracker = NPDC_Monoid()
-    if not mdc_result_list:
-        return npdc_tracker
-    for mdc_result in mdc_result_list:
-        npdc_tracker += NPDC_Monoid.make(mdc_result)
-
-    return npdc_tracker
+        return {"No successes :( Try running this again": None}
+    reducer = IHMResult.make_empty()
+    for i, single_ihm in enumerate(ihm_results):
+        reducer += single_ihm
+    return reducer.as_str()

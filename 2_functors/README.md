@@ -1,16 +1,24 @@
-# Foreword
+# Welcome to Functors
 
-## Note: A functor vs. a function
+## Table of Contents
 
-In `C++` (and perhaps other languages), people will occasionally refer to functors in a different light than we will in
-this tutorial.
-See [funtor vs. function - C++](https://stackoverflow.com/questions/6451866/why-use-functors-over-functions).
+1) [Functors Primer](#functors-primer)
+2) [Scenario](#scenario)
+    - [Functors Day 1](#mvp--feb-1st)
+    - [Functors Day 2: Expanding the Requirements](#expanding-the-requirements)
+    - [Functors Day 3: AVL Trees? Oh Noooo](#day-3--cleaning-up-our-avl-tree)
+3) [Closing Out](#closing-out)
 
-This tutorial discusses functors in the category theory sense.
+## Functors Primer
+
+As in the section on monoids, see [notes/functors_101](notes/functors_101.md) for a quick and dirty introduction. It
+would be useful to read that first before coming back, as
+it should prime
+your thinking and help you to reflect on what you are reading.
 
 ## Scenario
 
-After your big project, you sneak off to Hawaii for a bit. You've been watching "White Lotus". You have always
+After your big project, you sneak off to Hawaii for a bit as you've been watching "White Lotus". You have always
 wanted to go, so after the successful project launch from your monoid work, this was your opportunity. While in Hawaii,
 you
 run into Santa and Rudolph, and you all get to talking (while relaxing on the
@@ -29,13 +37,20 @@ with each IHM. Santa feels that
 some children are trying to game the system where they'd act good at home but are bad outside; getting the IHM loss
 would be a great first way to study this problem. You agree to spearhead this project and prototype it.
 
+**Note** The code with [sol/functor_day_0.py](sol/functor_day_0.py) will not actually run. The goal was to just move it
+over to act as a "starting" point for our development.
+
 ## MVP: Feb 1st
 
-You decide to start with a reduced problem - your goal is to "intercept" the data at the `MPDC` level and accumulate the
-results there. You decide to gather requirements and talk to the various teams:
+You step through your office door and just about get crushed by all the post-it notes and updates that have piled up.
+You spot
+two updates that catch your eye:
 
-- **Data Elfgineers**: they have **finally** added the `UUID` to the IHM results, which will make the lookups easy. They
-  asked for the ability to add arbitrary data to the tracked objects and modify the existing data.
+- **Data Elfgineers**: they have **finally** added the `UUID` to the IHM devices, which will make the lookups easy.
+  Looks like we'll soon be able to determine which household all the gradients have come from. You shake your head in
+  amazement that the compa... org has by for so long. Santa is touchy about people calling our organization a company...
+  something about tax reasons?
+    - **Request** the ability to add arbitrary data to the tracked objects and modify the existing data.
 
 - **Data Scientists**: they want the ability to "bin" the UUIDs; this would make studying behavior easy: "we want all
   IHMs where the `key` is between `X` and `Y`".
@@ -48,10 +63,12 @@ to come back to it later to fix it up.
 1) Get the UUIDs associated with each IHM
 2) Expose a function, `map_func`, to add arbitrary data to the stored IHM data
 3) Expose a function, `filter_on_key`, that allows you to filter arbitrary keys based on some bounds
+4) Store the loss so that we can allow `filters`
 
 ### A Solution
 
-`sol/functors_day_1.py` and `sol/functor_driver.py`, where we changed the code to include a sample
+See [sol/functor_day_1.py](sol/functor_day_1.py) for a possible solution. Note: our code here relies on probability
+to show "correctness".
 
 ## Expanding the Requirements
 
@@ -65,7 +82,8 @@ on [programiz](https://www.programiz.com/dsa/avl-tree).
 
 ### Tasklist
 
-1) Modify the system to support a binary search tree. An implementation is provided in `avl_tree.py`, which was modified
+1) Modify the system to support a binary search tree. An implementation is provided
+   in [sol/avl_tree_starter.py](sol/avl_tree_starter.py), which was modified
    for our problem.
 
 #### Note For the Task
@@ -75,10 +93,8 @@ in `day_2`. I'll mark out specific areas to note in the code.
 
 ### A solution
 
-`sol/functors_day_2.py`
-
-We create a new data structure that will accompany our MDC_Monoid. Thankfully, we can use this to quickly look up the
-appropriate values. Please read the comments at the top of the file and just the entire file overall.
+See [sol/functor_day_2.py](sol/functor_day_2.py) for a possible solution. Note: our code here relies on probability
+to show "correctness".
 
 ## Day 3: Cleaning up our AVL tree
 
@@ -90,8 +106,9 @@ over containers," which you think would help.
 
 ### Functors
 
-A functor must support, [at the minimum (according to Haskell)](https://wiki.haskell.org/Functor#Syntax), a `fmap`,
-which describes how to apply an arbitrary function into the function encapsulated in our class.
+As I'm sure you already read in the [functors_101.md](notes/functors_101.md), a functor must
+support, [at the minimum (according to Haskell)](https://wiki.haskell.org/Functor#Syntax), a `fmap`,
+which describes how to apply an arbitrary function into the container in our class.
 
 #### Further Discussion
 
@@ -111,15 +128,26 @@ into `sol/functor_day_3.py` and `sol/avl_tree_functor.py`
 
 ## Closing out
 
-Earlier, we mentioned that we were prototyping.
+### Improvements: Data Structure
 
-> We can assume that none of the IHMs will fail for the prototype. It's just easier to test it that way, but we will
-have
-to come back to it later to fix it up.
+If you're looking to refresh your data-structure chops, you can take a look at
+our [avl_tree_functor.py](sol/avl_tree_functor.py) implementation. Currently,
+it crashes if we have multiple of the same key, but I see no reason why it should. After all, multiple `IHMResult`s can
+have the same loss (even if it is unlikely). In fact, if you bump up `num_ihms = np.random.randint(10)` to be something like `1_000` you'll probably see what I mean.
 
-But now that we're past that hurdle, we've reached a point where we need to handle the `None` values that might get
-returned. Although Python has nice syntax for handling `None`, I'll introduce the following idea: `Maybe`. A `Maybe`
-encapsulates the idea of a "This-might-be-something," and if it is not, it is "Nothing". See
-how [Rust](https://doc.rust-lang.org/std/option/) handles optional values.
+### Additional work
 
-We revisit this idea and logging in our section on `monads` to finish this tutorial.
+We described a `functor` over the `ihm_results = simulate_ihm(num_ihms, prob_ihm_crash, NUM_FEATURES)` but we could have also defined it over
+the individual `IHMResult`, which would allow for another level of abstraction (which is very cool).
+
+### What IS and isn't a functor?
+
+In theory, a functor is more than "just" a container, it just describes a structure of how to apply functions. Given Haskell's nature, a function 
+is also a functor. Continuing that discussion, are the following functors?
+
+- `Binary Search Tree`
+- `Dictionary`
+- `Set`
+- `String`
+
+See [notes/what is and isnt a functor solutions](notes/what_is_isnt_functor_solutions.md)

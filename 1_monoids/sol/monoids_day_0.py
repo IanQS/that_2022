@@ -1,7 +1,7 @@
 """
 Our starting code
 """
-from typing import List, Optional, TypeVar
+from typing import List, Optional, TypeVar, Dict, Any
 
 import numpy as np
 
@@ -16,15 +16,13 @@ def ihm_failure():
     return None
 
 
-def mdc_failure():
-    return None
-
-
-def mdc_processor(ihm_results):
+def tsp_processor(ihm_results) -> Dict[str, Any]:
     accumulated_gradient = None
     if not ihm_results:
-        return None
+        return {"No successes :( Try running this again": None}
+    num_houses_queried = 0
     for i, result in enumerate(ihm_results):
+        num_houses_queried += 1
         if result is None:  # Our machine crashed (error calculating gradient, networking issue, etc.) We'll come back to this
             continue
         curr_grad = result
@@ -32,23 +30,8 @@ def mdc_processor(ihm_results):
             accumulated_gradient = curr_grad
         else:
             accumulated_gradient += curr_grad
-    return accumulated_gradient
-
-
-def npdc_processor(mdc_result_list: List[Optional[Result]]):
-    accumulated_gradient = None
-    if not mdc_result_list:
-        return None
-    for mdc_result in mdc_result_list:
-        if mdc_result is None:
-            continue
-        curr_grad = mdc_result
-        if accumulated_gradient is None:
-            accumulated_gradient = curr_grad
-        else:
-            accumulated_gradient += curr_grad
-
-    to_return = {
-        "accum_grad": accumulated_gradient,
+    return {
+        "Accumulated Gradients": accumulated_gradient,
+        "Num Houses Queried": num_houses_queried
     }
-    return to_return
+
